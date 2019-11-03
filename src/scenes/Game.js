@@ -1,27 +1,33 @@
+import {GameMap} from "../api/GameMap.js";
+import {FieldEnum} from "../enums/FieldEnum.js";
+
 export class Game extends Phaser.Scene {
 
-    constructor(){
+    constructor() {
         super({key: "Game"});
     }
 
-    preload(){
+    preload() {
         // load assets
     }
 
-    create(){
-        // create
+    create() {
 
-        let graphics = this.add.graphics();
+        this.graphics = this.add.graphics();
+        this.gameMap = new GameMap(29, 19);
 
-        graphics.fillStyle(0xFFFFFF, 1.0);
-        graphics.fillRect(50, 50, 200-50, 200-50);
-
-        graphics.fillStyle(0xFFFF00, 1.0);
-        graphics.fillRect(200, 200, 100, 100);
-
+        for (let i = 0; i < this.gameMap.map.length; i++) {
+            for (let j = 0; j < this.gameMap.map[0].length; j++) {
+                if (this.gameMap.map[i][j] === FieldEnum.EMPTY)
+                    this.graphics.fillStyle(0x009933, 1.0);
+                else if (this.gameMap.map[i][j] === FieldEnum.STONE)
+                    this.graphics.fillStyle(0x808080, 1.0);
+                this.graphics.fillRect(i * 40, j * 40, 40, 40);
+            }
+        }
     }
 
-    update(){
+    update() {
         // update
     }
 
