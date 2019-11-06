@@ -1,6 +1,9 @@
 import {GameMap} from "../api/GameMap.js";
 import {FieldEnum} from "../enums/FieldEnum.js";
 
+let socket = io();
+let gameMap = new GameMap();
+
 export class Game extends Phaser.Scene {
 
     constructor() {
@@ -12,18 +15,16 @@ export class Game extends Phaser.Scene {
     }
 
     create() {
-
         this.graphics = this.add.graphics();
-        this.gameMap = new GameMap(29, 19);
+        socket.emit('spawn', "");
+    }
 
-        this.gameMap.clearForPlayer(1,1);
-        this.gameMap.clearForPlayer(27,17);
-
-        for (let i = 0; i < this.gameMap.map.length; i++) {
-            for (let j = 0; j < this.gameMap.map[0].length; j++) {
-                if (this.gameMap.map[i][j] === FieldEnum.EMPTY)
+    update() {
+        for (let i = 0; i < gameMap.map.length; i++) {
+            for (let j = 0; j < gameMap.map[0].length; j++) {
+                if (gameMap.map[i][j] === FieldEnum.EMPTY)
                     this.graphics.fillStyle(0x009933, 1.0);
-                else if (this.gameMap.map[i][j] === FieldEnum.STONE)
+                else if (gameMap.map[i][j] === FieldEnum.STONE)
                     this.graphics.fillStyle(0x808080, 1.0);
                 else
                     this.graphics.fillStyle(0x802b00, 1.0);
@@ -32,8 +33,8 @@ export class Game extends Phaser.Scene {
         }
     }
 
-    update() {
-        // update
-    }
-
 }
+
+socket.on('spawn', function (data) {
+    gameMap.map = data.map;
+});
