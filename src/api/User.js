@@ -11,8 +11,8 @@ export class User {
     }
 
     transit(x, y) {
+        if (this.inTransit) return;
         let t = this;
-        if (t.inTransit) return;
         t.inTransit = true;
         for (let i = 0; i < 10; ++i) {
             setTimeout(function() {

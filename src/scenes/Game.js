@@ -1,11 +1,13 @@
 import {GameMap} from "../api/GameMap.js";
 import {FieldEnum} from "../enums/FieldEnum.js";
+import {Point} from "../api/Point.js";
 import {User} from "../api/User.js";
 
 let socket = io();
 let gameMap = new GameMap();
-let user = new User(1,1, 40);
+let users = new Map();
 
+let user;
 let keys = [];
 
 export class Game extends Phaser.Scene {
@@ -29,6 +31,9 @@ export class Game extends Phaser.Scene {
     }
 
     update() {
+
+        user = users.get(socket.id);
+
         this.graphics.clear();
         for (let i = 0; i < gameMap.map.length; i++) {
             for (let j = 0; j < gameMap.map[0].length; j++) {
@@ -41,19 +46,48 @@ export class Game extends Phaser.Scene {
                 this.graphics.fillRect(j * 40, i * 40, 40, 40);
             }
         }
-        if(keys[0].isDown && gameMap.map[user.y][user.x - 1] !== FieldEnum.STONE)
+        if (keys[0].isDown) {
+            socket.emit('move', new Point(user.x - 1, user.y));
             user.transit(user.x - 1, user.y);
-        if(keys[1].isDown && gameMap.map[user.y + 1][user.x] !== FieldEnum.STONE)
+        }
+        else if (keys[1].isDown) {
+            socket.emit('move', new Point(user.x, user.y + 1));
             user.transit(user.x, user.y + 1);
-        if(keys[2].isDown && gameMap.map[user.y][user.x + 1] !== FieldEnum.STONE)
+        }
+        else if (keys[2].isDown) {
+            socket.emit('move', new Point(user.x + 1, user.y));
             user.transit(user.x + 1, user.y);
-        if(keys[3].isDown && gameMap.map[user.y - 1][user.x] !== FieldEnum.STONE)
+        }
+        else if (keys[3].isDown) {
+            socket.emit('move', new Point(user.x, user.y - 1));
             user.transit(user.x, user.y - 1);
-        user.draw(this.graphics);
+        }
+
+        for (const v of users.values()) {
+            this.graphics.fillStyle(0x802bFF, 1.0);
+            this.graphics.fillRect(v.x * v.size + v.t1, v.y * v.size + v.t2, 40, 40);
+        }
+
     }
 
 }
 
 socket.on('spawn', function (data) {
     gameMap.map = data.map;
+    let u2 = new Map(JSON.parse(data.users));
+    for (let [key, value] of u2.entries()) {
+        console.log(key + ' = ' + value);
+        users.set(key, new User(value.x, value.y, 40));
+    }
+
+    user = data.user;
+});
+
+socket.on('move', function (data) {
+    users.get(data.id).transit(data.pos.x, data.pos.y);
+    console.warn(users.get(data.id));
+});
+
+socket.on('newUser', function (data) {
+    users.set(data.id, new User(data.user.x, data.user.y, 40));
 });
