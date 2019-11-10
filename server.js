@@ -38,17 +38,20 @@ io.on('connection', function (socket) {
     });
 
     socket.on('move', function (pos) {
+        if(users.get(socket.id).inTransit) return;
+
         let data = {
             'id' : socket.id,
             'pos' : pos
         };
-        users.get(socket.id).transit(pos.x, pos.y);
         socket.broadcast.emit('move', data);
+        users.get(socket.id).transit(pos.x, pos.y);
     });
 
     socket.on('disconnect', function () {
         console.log(`ID ${socket.id} disconnected!`);
         users.delete(socket.id);
+        socket.broadcast.emit("disconnectUser", socket.id);
     });
 });
 

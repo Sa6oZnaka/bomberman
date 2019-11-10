@@ -7,7 +7,7 @@ let socket = io();
 let gameMap = new GameMap();
 let users = new Map();
 
-let user;
+let user = new User(0,0,0);
 let keys = [];
 
 export class Game extends Phaser.Scene {
@@ -46,28 +46,29 @@ export class Game extends Phaser.Scene {
                 this.graphics.fillRect(j * 40, i * 40, 40, 40);
             }
         }
-        if (keys[0].isDown) {
-            socket.emit('move', new Point(user.x - 1, user.y));
-            user.transit(user.x - 1, user.y);
-        }
-        else if (keys[1].isDown) {
-            socket.emit('move', new Point(user.x, user.y + 1));
-            user.transit(user.x, user.y + 1);
-        }
-        else if (keys[2].isDown) {
-            socket.emit('move', new Point(user.x + 1, user.y));
-            user.transit(user.x + 1, user.y);
-        }
-        else if (keys[3].isDown) {
-            socket.emit('move', new Point(user.x, user.y - 1));
-            user.transit(user.x, user.y - 1);
+
+        if(user !== undefined && !user.inTransit) {
+            if (keys[0].isDown) {
+                socket.emit('move', new Point(user.x - 1, user.y));
+                user.transit(user.x - 1, user.y);
+            } else if (keys[1].isDown) {
+                socket.emit('move', new Point(user.x, user.y + 1));
+                user.transit(user.x, user.y + 1);
+            } else if (keys[2].isDown) {
+                socket.emit('move', new Point(user.x + 1, user.y));
+                user.transit(user.x + 1, user.y);
+            } else if (keys[3].isDown) {
+                socket.emit('move', new Point(user.x, user.y - 1));
+                user.transit(user.x, user.y - 1);
+                console.warn(has_blurred);
+            }
         }
 
         for (const v of users.values()) {
             this.graphics.fillStyle(0x802bFF, 1.0);
             this.graphics.fillRect(v.x * v.size + v.t1, v.y * v.size + v.t2, 40, 40);
         }
-
+        
     }
 
 }
@@ -85,9 +86,12 @@ socket.on('spawn', function (data) {
 
 socket.on('move', function (data) {
     users.get(data.id).transit(data.pos.x, data.pos.y);
-    console.warn(users.get(data.id));
 });
 
 socket.on('newUser', function (data) {
     users.set(data.id, new User(data.user.x, data.user.y, 40));
+});
+
+socket.on('disconnectUser', function (id) {
+    users.delete(id);
 });
