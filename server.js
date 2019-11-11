@@ -1,5 +1,6 @@
 import {GameMap} from "./src/api/GameMap.js";
 import {User} from "./src/api/User";
+import {Point} from "./src/api/Point";
 
 let express = require('express');
 let app = express();
@@ -20,13 +21,12 @@ io.on('connection', function (socket) {
     console.log(`ID ${socket.id} connected!`);
 
     socket.on('spawn', function () {
-        users.set(socket.id, new User(0, 0, 40));
+        users.set(socket.id, new User(1, 1, 40));
 
         let usersJSON = JSON.stringify(Array.from(users.entries()));
         let data = {
             'map': gameMap.map,
             'users' : usersJSON,
-            'user' : users.get(socket.id)
         };
         let data2 = {
             'id' : socket.id,
@@ -38,14 +38,21 @@ io.on('connection', function (socket) {
     });
 
     socket.on('move', function (pos) {
-        if(users.get(socket.id).inTransit) return;
-
-        let data = {
-            'id' : socket.id,
-            'pos' : pos
-        };
-        socket.broadcast.emit('move', data);
-        users.get(socket.id).transit(pos.x, pos.y);
+        let user = users.get(socket.id);
+        if(possibleMovement(user, pos)) {
+            let data = {
+                'id': socket.id,
+                'pos': pos
+            };
+            socket.broadcast.emit('move', data);
+            users.get(socket.id).transit(pos.x, pos.y);
+        }else{
+            let data = {
+                'id': socket.id,
+                'pos': new Point(user.x, user.y)
+            };
+            socket.emit('move', data);
+        }
     });
 
     socket.on('disconnect', function () {
@@ -53,6 +60,17 @@ io.on('connection', function (socket) {
         users.delete(socket.id);
         socket.broadcast.emit("disconnectUser", socket.id);
     });
+
+    function possibleMovement(user, pos) {
+        if(user.inTransit){
+            return false;
+        }
+        if(Math.abs(pos.x - user.x) + Math.abs(pos.y - user.y) <= 1){
+            return true;
+        }
+        return false;
+    }
+
 });
 
 let port = process.env.PORT || 3000;

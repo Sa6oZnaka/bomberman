@@ -32,8 +32,6 @@ export class Game extends Phaser.Scene {
 
     update() {
 
-        user = users.get(socket.id);
-
         this.graphics.clear();
         for (let i = 0; i < gameMap.map.length; i++) {
             for (let j = 0; j < gameMap.map[0].length; j++) {
@@ -60,7 +58,6 @@ export class Game extends Phaser.Scene {
             } else if (keys[3].isDown) {
                 socket.emit('move', new Point(user.x, user.y - 1));
                 user.transit(user.x, user.y - 1);
-                console.warn(has_blurred);
             }
         }
 
@@ -77,14 +74,17 @@ socket.on('spawn', function (data) {
     gameMap.map = data.map;
     let u2 = new Map(JSON.parse(data.users));
     for (let [key, value] of u2.entries()) {
-        console.log(key + ' = ' + value);
         users.set(key, new User(value.x, value.y, 40));
     }
-
-    user = data.user;
+    user = users.get(socket.id);
 });
 
 socket.on('move', function (data) {
+    if(data.id === socket.id){
+        console.warn("Rollback detected!");
+        user.inTransit = false;
+    }
+
     users.get(data.id).transit(data.pos.x, data.pos.y);
 });
 
