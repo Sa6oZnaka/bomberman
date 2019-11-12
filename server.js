@@ -1,6 +1,7 @@
 import {GameMap} from "./src/api/GameMap.js";
 import {User} from "./src/api/User";
 import {Point} from "./src/api/Point";
+import {FieldEnum} from "./src/enums/FieldEnum";
 
 let express = require('express');
 let app = express();
@@ -65,10 +66,13 @@ io.on('connection', function (socket) {
         if(user.inTransit){
             return false;
         }
-        if(Math.abs(pos.x - user.x) + Math.abs(pos.y - user.y) <= 1){
-            return true;
+        if(Math.abs(pos.x - user.x) + Math.abs(pos.y - user.y) > 1){
+            return false;
         }
-        return false;
+        if(gameMap.map[pos.y][pos.x] === FieldEnum.STONE){
+            return false;
+        }
+        return true;
     }
 
 });

@@ -46,18 +46,19 @@ export class Game extends Phaser.Scene {
         }
 
         if(user !== undefined && !user.inTransit) {
-            if (keys[0].isDown) {
-                socket.emit('move', new Point(user.x - 1, user.y));
-                user.transit(user.x - 1, user.y);
-            } else if (keys[1].isDown) {
-                socket.emit('move', new Point(user.x, user.y + 1));
-                user.transit(user.x, user.y + 1);
-            } else if (keys[2].isDown) {
-                socket.emit('move', new Point(user.x + 1, user.y));
-                user.transit(user.x + 1, user.y);
-            } else if (keys[3].isDown) {
-                socket.emit('move', new Point(user.x, user.y - 1));
-                user.transit(user.x, user.y - 1);
+            let newPosition;
+            if (keys[0].isDown && gameMap.map[user.y][user.x - 1] !== FieldEnum.STONE) { // A
+                newPosition = new Point(user.x - 1, user.y);
+            } else if (keys[1].isDown && gameMap.map[user.y + 1][user.x] !== FieldEnum.STONE) { // S
+                newPosition = new Point(user.x, user.y + 1);
+            } else if (keys[2].isDown && gameMap.map[user.y][user.x + 1] !== FieldEnum.STONE) { // D
+                newPosition = new Point(user.x + 1, user.y);
+            } else if (keys[3].isDown && gameMap.map[user.y - 1][user.x] !== FieldEnum.STONE) { // W
+                newPosition = new Point(user.x, user.y - 1);
+            }
+            if(newPosition !== undefined){
+                socket.emit('move', newPosition);
+                user.transit(newPosition.x, newPosition.y);
             }
         }
 
