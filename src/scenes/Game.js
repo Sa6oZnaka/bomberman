@@ -9,6 +9,7 @@ let users = new Map();
 
 let user = new User(0,0,0);
 let keys = [];
+let spawned = false;
 
 export class Game extends Phaser.Scene {
 
@@ -45,7 +46,7 @@ export class Game extends Phaser.Scene {
             }
         }
 
-        if(user !== undefined && !user.inTransit) {
+        if(spawned && !user.inTransit) {
             let newPosition;
             if (keys[0].isDown && gameMap.map[user.y][user.x - 1] !== FieldEnum.STONE) { // A
                 newPosition = new Point(user.x - 1, user.y);
@@ -78,9 +79,11 @@ socket.on('spawn', function (data) {
         users.set(key, new User(value.x, value.y, 40));
     }
     user = users.get(socket.id);
+    spawned = true;
 });
 
 socket.on('move', function (data) {
+    if(! spawned) return;
     if(data.id === socket.id){
         console.warn("Rollback detected!");
         user.inTransit = false;
@@ -90,9 +93,11 @@ socket.on('move', function (data) {
 });
 
 socket.on('newUser', function (data) {
+    if(! spawned) return;
     users.set(data.id, new User(data.user.x, data.user.y, 40));
 });
 
 socket.on('disconnectUser', function (id) {
+    if(! spawned) return;
     users.delete(id);
 });
