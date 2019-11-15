@@ -29,6 +29,7 @@ export class Game extends Phaser.Scene {
         keys.push(this.input.keyboard.addKey('S'));
         keys.push(this.input.keyboard.addKey('D'));
         keys.push(this.input.keyboard.addKey('W'));
+        keys.push(this.input.keyboard.addKey('E'));
     }
 
     update() {
@@ -40,8 +41,10 @@ export class Game extends Phaser.Scene {
                     this.graphics.fillStyle(0x009933, 1.0);
                 else if (gameMap.map[i][j] === FieldEnum.STONE)
                     this.graphics.fillStyle(0x808080, 1.0);
-                else
+                else if (gameMap.map[i][j] === FieldEnum.BARRICADE)
                     this.graphics.fillStyle(0x802b00, 1.0);
+                else
+                    this.graphics.fillStyle(0x000000, 1.0);
                 this.graphics.fillRect(j * 40, i * 40, 40, 40);
             }
         }
@@ -57,6 +60,11 @@ export class Game extends Phaser.Scene {
             } else if (keys[3].isDown && gameMap.map[user.y - 1][user.x] !== FieldEnum.STONE) { // W
                 newPosition = new Point(user.x, user.y - 1);
             }
+            if(keys[4].isDown){
+                console.warn(user.x, user.y);
+                gameMap.placeBomb(user.x, user.y);
+            }
+
             if(newPosition !== undefined){
                 socket.emit('move', newPosition);
                 user.transit(newPosition.x, newPosition.y);

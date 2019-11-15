@@ -31,13 +31,14 @@ export class GameMap {
     static getNeighbors(x, y) {
         return [new Point(x - 1, y), new Point(x + 1, y), new Point(x, y - 1), new Point(x, y + 1)];
     }
-    
+
     outOfBonds(x, y) {
+        console.error(this.map[0].length, this.map.length - 1);
         return (x < 0 || y < 0 || x > this.map[0].length - 1 || y > this.map.length - 1);
     }
 
     clearForPlayer(x, y) {
-        if(! this.outOfBonds(x, y) && this.map[y][x] !== FieldEnum.STONE) {
+        if (!this.outOfBonds(x, y) && this.map[y][x] !== FieldEnum.STONE) {
             this.map[y][x] = FieldEnum.EMPTY;
             let neighbors = GameMap.getNeighbors(x, y);
             for (let i = 0; i < neighbors.length; i++) {
@@ -47,4 +48,48 @@ export class GameMap {
             }
         }
     }
+
+    detonate(x, y) {
+        let r = 5;
+        this.map[y][x] = FieldEnum.EMPTY;
+        for (let i = 1; i < r + 1; i ++) {
+            if(this.explodeField(x + i, y)) break;
+        }
+        for (let i = 1; i < r + 1; i ++) {
+            if(this.explodeField(x - i, y)) break;
+        }
+        for (let i = 1; i < r + 1; i ++) {
+            if(this.explodeField(x, y - i)) break;
+        }
+        for (let i = 1; i < r + 1; i ++) {
+            if(this.explodeField(x, y + i)) break;
+        }
+    }
+
+    explodeField(x, y){
+        if (this.map[y][x] === FieldEnum.BOMB) {
+            this.detonate(x, y);
+            return true;
+        }
+        if (this.map[y][x] === FieldEnum.STONE)
+            return true;
+        if (this.map[y][x] === FieldEnum.BARRICADE){
+            this.map[y][x] = FieldEnum.EMPTY;
+            return true;
+        }
+        return false;
+    }
+
+    placeBomb(x, y) {
+        if (!this.outOfBonds(x, y) && this.map[y][x] !== FieldEnum.BOMB) {
+            let t = this;
+            t.map[y][x] = FieldEnum.BOMB;
+            setTimeout(function () {
+                if(t.map[y][x] === FieldEnum.BOMB)
+                    t.detonate(x, y);
+            }, 1000);
+        }
+    }
+
+
 }
