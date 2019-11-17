@@ -29,7 +29,7 @@ export class Game extends Phaser.Scene {
         keys.push(this.input.keyboard.addKey('S'));
         keys.push(this.input.keyboard.addKey('D'));
         keys.push(this.input.keyboard.addKey('W'));
-        keys.push(this.input.keyboard.addKey('E'));
+        keys.push(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE));
     }
 
     update() {
@@ -43,6 +43,8 @@ export class Game extends Phaser.Scene {
                     this.graphics.fillStyle(0x808080, 1.0);
                 else if (gameMap.map[i][j] === FieldEnum.BARRICADE)
                     this.graphics.fillStyle(0x802b00, 1.0);
+                else if (gameMap.map[i][j] === FieldEnum.EXPLOSION)
+                    this.graphics.fillStyle(0xff0000, 1.0);
                 else
                     this.graphics.fillStyle(0x000000, 1.0);
                 this.graphics.fillRect(j * 40, i * 40, 40, 40);

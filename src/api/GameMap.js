@@ -49,24 +49,31 @@ export class GameMap {
         }
     }
 
-    detonate(x, y) {
-        let r = 5;
-        this.map[y][x] = FieldEnum.EMPTY;
+    detonate(x, y, r = 5) {
+        this.explodeField(x, y);
         for (let i = 1; i < r + 1; i ++) {
-            if(this.explodeField(x + i, y)) break;
+            if(this.explode(x + i, y)) break;
         }
         for (let i = 1; i < r + 1; i ++) {
-            if(this.explodeField(x - i, y)) break;
+            if(this.explode(x - i, y)) break;
         }
         for (let i = 1; i < r + 1; i ++) {
-            if(this.explodeField(x, y - i)) break;
+            if(this.explode(x, y - i)) break;
         }
         for (let i = 1; i < r + 1; i ++) {
-            if(this.explodeField(x, y + i)) break;
+            if(this.explode(x, y + i)) break;
         }
     }
 
     explodeField(x, y){
+        this.map[y][x] = FieldEnum.EXPLOSION;
+        let t = this;
+        setTimeout(function () {
+            t.clearExplosion(x, y);
+        }, 200);
+    }
+
+    explode(x, y){
         if (this.map[y][x] === FieldEnum.BOMB) {
             this.detonate(x, y);
             return true;
@@ -74,22 +81,25 @@ export class GameMap {
         if (this.map[y][x] === FieldEnum.STONE)
             return true;
         if (this.map[y][x] === FieldEnum.BARRICADE){
-            this.map[y][x] = FieldEnum.EMPTY;
+            this.explodeField(x, y);
             return true;
         }
+        this.explodeField(x, y);
         return false;
+    }
+
+    clearExplosion(x, y){
+        this.map[y][x] = FieldEnum.EMPTY;
     }
 
     placeBomb(x, y) {
         if (!this.outOfBonds(x, y) && this.map[y][x] !== FieldEnum.BOMB) {
             let t = this;
-            t.map[y][x] = FieldEnum.BOMB;
+            this.map[y][x] = FieldEnum.BOMB;
             setTimeout(function () {
                 if(t.map[y][x] === FieldEnum.BOMB)
                     t.detonate(x, y);
             }, 1000);
         }
     }
-
-
 }
