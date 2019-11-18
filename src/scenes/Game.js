@@ -63,7 +63,6 @@ export class Game extends Phaser.Scene {
                 newPosition = new Point(user.x, user.y - 1);
             }
             if(keys[4].isDown){
-                console.warn(user.x, user.y);
                 gameMap.placeBomb(user.x, user.y);
             }
 
@@ -75,7 +74,7 @@ export class Game extends Phaser.Scene {
 
         for (const v of users.values()) {
             this.graphics.fillStyle(0x802bFF, 1.0);
-            this.graphics.fillRect(v.x * v.size + v.t1, v.y * v.size + v.t2, 40, 40);
+            this.graphics.fillRect(v.x * v.size + v.transitionX, v.y * v.size + v.transitionY, 40, 40);
         }
         
     }

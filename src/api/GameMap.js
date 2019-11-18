@@ -9,7 +9,6 @@ export class GameMap {
 
     static init(x, y) {
         let map = [];
-
         for (let i = 0; i < y; i++) {
             map[i] = [];
             for (let j = 0; j < x; j++) {
@@ -24,7 +23,6 @@ export class GameMap {
                 }
             }
         }
-
         return map;
     }
 
@@ -33,7 +31,6 @@ export class GameMap {
     }
 
     outOfBonds(x, y) {
-        console.error(this.map[0].length, this.map.length - 1);
         return (x < 0 || y < 0 || x > this.map[0].length - 1 || y > this.map.length - 1);
     }
 
@@ -52,28 +49,27 @@ export class GameMap {
     detonate(x, y, r = 5) {
         this.explodeField(x, y);
         for (let i = 1; i < r + 1; i ++) {
-            if(this.explode(x + i, y)) break;
+            if(this.canExplode(x + i, y)) break;
         }
         for (let i = 1; i < r + 1; i ++) {
-            if(this.explode(x - i, y)) break;
+            if(this.canExplode(x - i, y)) break;
         }
         for (let i = 1; i < r + 1; i ++) {
-            if(this.explode(x, y - i)) break;
+            if(this.canExplode(x, y - i)) break;
         }
         for (let i = 1; i < r + 1; i ++) {
-            if(this.explode(x, y + i)) break;
+            if(this.canExplode(x, y + i)) break;
         }
     }
 
     explodeField(x, y){
         this.map[y][x] = FieldEnum.EXPLOSION;
-        let t = this;
-        setTimeout(function () {
-            t.clearExplosion(x, y);
+        setTimeout( () => {
+            this.clearExplosion(x, y);
         }, 200);
     }
 
-    explode(x, y){
+    canExplode(x, y){
         if (this.map[y][x] === FieldEnum.BOMB) {
             this.detonate(x, y);
             return true;
@@ -94,11 +90,10 @@ export class GameMap {
 
     placeBomb(x, y) {
         if (!this.outOfBonds(x, y) && this.map[y][x] !== FieldEnum.BOMB) {
-            let t = this;
             this.map[y][x] = FieldEnum.BOMB;
-            setTimeout(function () {
-                if(t.map[y][x] === FieldEnum.BOMB)
-                    t.detonate(x, y);
+            setTimeout(() => {
+                if(this.map[y][x] === FieldEnum.BOMB)
+                    this.detonate(x, y);
             }, 1000);
         }
     }

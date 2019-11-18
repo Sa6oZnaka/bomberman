@@ -6,34 +6,33 @@ export class User {
         this.size = size;
         this.inTransit = false;
 
-        this.t1 = 0;
-        this.t2 = 0;
+        this.transitionX = 0;
+        this.transitionY = 0;
     }
 
     transit(x, y) {
         if (this.inTransit) return;
-        let t = this;
-        t.inTransit = true;
+        this.inTransit = true;
         for (let i = 0; i < 10; ++i) {
-            setTimeout(function() {
-                t.t1 += Math.round((x - t.x) * t.size / 10);
-                t.t2 += Math.round((y - t.y) * t.size / 10);
+            setTimeout(() => {
+                this.transitionX += Math.round((x - this.x) * this.size / 10);
+                this.transitionY += Math.round((y - this.y) * this.size / 10);
             }, 10 * (i + 1));
         }
-        setTimeout(function() {
-            t.t1 = 0;
-            t.t2 = 0;
+        setTimeout( () => {
+            this.transitionX = 0;
+            this.transitionY = 0;
 
-            t.x = x;
-            t.y = y;
+            this.x = x;
+            this.y = y;
 
-            t.inTransit = false;
+            this.inTransit = false;
         }, 100);
     }
 
     draw(graphics){
         graphics.fillStyle(0x802bFF, 1.0);
-        graphics.fillRect(this.x * this.size + this.t1, this.y * this.size + this.t2, 40, 40);
+        graphics.fillRect(this.x * this.size + this.transitionX, this.y * this.size + this.transitionY, 40, 40);
     }
 
 }
