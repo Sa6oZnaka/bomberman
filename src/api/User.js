@@ -1,6 +1,6 @@
 export class User {
 
-    constructor(x, y, size){
+    constructor(x, y, size) {
         this.x = x;
         this.y = y;
         this.size = size;
@@ -19,7 +19,7 @@ export class User {
                 this.transitionY += Math.round((y - this.y) * this.size / 10);
             }, 10 * (i + 1));
         }
-        setTimeout( () => {
+        setTimeout(() => {
             this.transitionX = 0;
             this.transitionY = 0;
 
@@ -28,11 +28,6 @@ export class User {
 
             this.inTransit = false;
         }, 100);
-    }
-
-    draw(graphics){
-        graphics.fillStyle(0x802bFF, 1.0);
-        graphics.fillRect(this.x * this.size + this.transitionX, this.y * this.size + this.transitionY, 40, 40);
     }
 
 }

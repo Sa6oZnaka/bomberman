@@ -27,27 +27,35 @@ io.on('connection', function (socket) {
         let usersJSON = JSON.stringify(Array.from(users.entries()));
         let data = {
             'map': gameMap.map,
-            'users' : usersJSON,
+            'users': usersJSON,
         };
         let data2 = {
-            'id' : socket.id,
-            'user' : users.get(socket.id)
+            'id': socket.id,
+            'user': users.get(socket.id)
         };
 
         socket.emit('spawn', data);
         socket.broadcast.emit('newUser', data2);
     });
 
+    socket.on('placeBomb', function (pos) {
+        let data = {
+            'pos': pos
+        };
+        gameMap.placeBomb(pos.x, pos.y);
+        socket.broadcast.emit('placeBomb', data);
+    });
+
     socket.on('move', function (pos) {
         let user = users.get(socket.id);
-        if(possibleMovement(user, pos)) {
+        if (possibleMovement(user, pos)) {
             let data = {
                 'id': socket.id,
                 'pos': pos
             };
             socket.broadcast.emit('move', data);
             users.get(socket.id).transit(pos.x, pos.y);
-        }else{
+        } else {
             let data = {
                 'id': socket.id,
                 'pos': new Point(user.x, user.y)
@@ -63,13 +71,13 @@ io.on('connection', function (socket) {
     });
 
     function possibleMovement(user, pos) {
-        if(user.inTransit){
+        if (user.inTransit) {
             return false;
         }
-        if(Math.abs(pos.x - user.x) + Math.abs(pos.y - user.y) > 1){
+        if (Math.abs(pos.x - user.x) + Math.abs(pos.y - user.y) > 1) {
             return false;
         }
-        if(gameMap.map[pos.y][pos.x] === FieldEnum.STONE){
+        if (gameMap.map[pos.y][pos.x] === FieldEnum.STONE) {
             return false;
         }
         return true;
