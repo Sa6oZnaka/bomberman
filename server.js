@@ -2,6 +2,7 @@ import {GameMap} from "./src/api/GameMap.js";
 import {User} from "./src/api/User";
 import {Point} from "./src/api/Point";
 import {FieldEnum} from "./src/enums/FieldEnum";
+import {config} from "./src/config/config";
 
 let express = require('express');
 let app = express();
@@ -22,7 +23,7 @@ io.on('connection', function (socket) {
     console.log(`ID ${socket.id} connected!`);
 
     socket.on('spawn', function () {
-        users.set(socket.id, new User(1, 1, 40));
+        users.set(socket.id, new User(1, 1, config.GRID_CELL_SIZE));
 
         let usersJSON = JSON.stringify(Array.from(users.entries()));
         let data = {
@@ -85,7 +86,7 @@ io.on('connection', function (socket) {
 
 });
 
-let port = process.env.PORT || 3000;
+let port = process.env.PORT || config.SERVER_PORT;
 http.listen(port, function () {
     console.log("listening on port " + port);
 });
