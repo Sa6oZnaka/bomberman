@@ -1,8 +1,5 @@
-import {GameMap} from "./src/api/GameMap.js";
-import {User} from "./src/api/User";
-import {Point} from "./src/api/Point";
-import {FieldEnum} from "./src/enums/FieldEnum";
 import {config} from "./src/config/config";
+import {Room} from "./src/api/Room";
 
 let express = require('express');
 let app = express();
@@ -10,8 +7,8 @@ let http = require('http').createServer(app);
 const path = require('path');
 let io = require('socket.io')(http);
 
-let gameMap = new GameMap(29, 19);
-let users = new Map();
+let rooms = new Map();
+let playerRooms = new Map();
 
 app.use('/src', express.static('src'));
 
@@ -23,67 +20,82 @@ io.on('connection', function (socket) {
     console.log(`ID ${socket.id} connected!`);
 
     socket.on('spawn', function () {
-        users.set(socket.id, new User(1, 1, config.GRID_CELL_SIZE));
 
-        let usersJSON = JSON.stringify(Array.from(users.entries()));
+        let room;
+        let connected = false;
+        while (!connected) {
+            room = getAvailableRoom();
+            if (rooms.get(room).connect(socket.id)) {
+                playerRooms.set(socket.id, room);
+                socket.join(room);
+                connected = true;
+            }
+        }
+
         let data = {
-            'map': gameMap.map,
-            'users': usersJSON,
+            'map': rooms.get(room).getMap(),
+            'users': rooms.get(room).getUsers(),
         };
         let data2 = {
             'id': socket.id,
-            'user': users.get(socket.id)
+            'user': rooms.get(room).getUser(socket.id)
         };
 
         socket.emit('spawn', data);
-        socket.broadcast.emit('newUser', data2);
+        socket.to(playerRooms.get(socket.id)).emit('newUser', data2);
     });
 
     socket.on('placeBomb', function (pos) {
         let data = {
             'pos': pos
         };
-        gameMap.placeBomb(pos.x, pos.y);
-        socket.broadcast.emit('placeBomb', data);
+        getPlayerRoom(socket.id).placeBomb(pos);
+        socket.to(playerRooms.get(socket.id)).emit('placeBomb', data);
     });
 
     socket.on('move', function (pos) {
-        let user = users.get(socket.id);
-        if (possibleMovement(user, pos)) {
+        let room = getPlayerRoom(socket.id);
+        if (room.possibleMovement(socket.id, pos)) {
+            room.movePlayer(socket.id, pos);
             let data = {
                 'id': socket.id,
                 'pos': pos
             };
-            socket.broadcast.emit('move', data);
-            users.get(socket.id).transit(pos.x, pos.y);
+            socket.to(playerRooms.get(socket.id)).emit('move', data);
         } else {
             let data = {
                 'id': socket.id,
-                'pos': new Point(user.x, user.y)
+                'pos': room.getLastPosition(socket.id)
             };
             socket.emit('move', data);
         }
     });
 
     socket.on('disconnect', function () {
-        console.log(`ID ${socket.id} disconnected!`);
-        users.delete(socket.id);
-        socket.broadcast.emit("disconnectUser", socket.id);
+        let room = getPlayerRoom(socket.id);
+        if (room !== undefined) { // after server restart client disconnect
+            room.leave(socket.id);
+            socket.to(playerRooms.get(socket.id)).emit("disconnectUser", socket.id);
+            socket.leave(playerRooms.get(socket.id));
+            playerRooms.delete(socket.id);
+            console.log(`ID ${socket.id} disconnected!`);
+        }
     });
 
-    function possibleMovement(user, pos) {
-        if (user.inTransit) {
-            return false;
-        }
-        if (Math.abs(pos.x - user.x) + Math.abs(pos.y - user.y) > 1) {
-            return false;
-        }
-        if (gameMap.map[pos.y][pos.x] === FieldEnum.STONE) {
-            return false;
-        }
-        return true;
+    function getPlayerRoom(id) {
+        return rooms.get(playerRooms.get(id));
     }
 
+    function getAvailableRoom() {
+        for (let [key, room] of rooms.entries()) {
+            if (room.hasAvailableSlot()) {
+                return key;
+            }
+        }
+        let roomID = rooms.size;
+        rooms.set("room" + roomID, new Room(2));
+        return "room" + roomID;
+    }
 });
 
 let port = process.env.PORT || config.SERVER_PORT;
