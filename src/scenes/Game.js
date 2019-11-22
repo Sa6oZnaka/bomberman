@@ -50,13 +50,14 @@ export class Game extends Phaser.Scene {
     }
 
     move(x, y){
-        if(! user.inTransit && gameMap.map[y][x] !== FieldEnum.STONE){
+        if(! user.inTransit && gameMap.map[y][x] === FieldEnum.EMPTY){
             user.transit(x, y);
             socket.emit('move', new Point(x, y));
         }
     }
 
     placeBomb(x, y){
+        console.log("SENT BOMB");
         socket.emit('placeBomb', new Point(user.x, user.y));
         gameMap.placeBomb(x, y);
     }
@@ -83,13 +84,19 @@ socket.on('move', function (data) {
     users.get(data.id).transit(data.pos.x, data.pos.y);
 });
 
-socket.on('placeBomb', function (data) {
-    gameMap.placeBomb(data.pos.x, data.pos.y);
+socket.on('placeBomb', function (pos) {
+    console.log("PLACE BOMB");
+    gameMap.placeBomb(pos.x, pos.y);
+});
+
+socket.on('explode', function (pos) {
+    gameMap.detonate(pos.x, pos.y);
 });
 
 socket.on('newUser', function (data) {
     if (!spawned) return;
     users.set(data.id, new User(data.user.x, data.user.y, 40));
+    gameMap.clearForPlayer(data.user.x, data.user.y);
 });
 
 socket.on('disconnectUser', function (id) {

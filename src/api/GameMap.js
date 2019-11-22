@@ -69,6 +69,14 @@ export class GameMap {
         }, 200);
     }
 
+    hasBomb(x, y){
+        return this.map[y][x] === FieldEnum.BOMB;
+    }
+
+    hasExplosion(x, y){
+        return this.map[y][x] === FieldEnum.EXPLOSION;
+    }
+
     canExplode(x, y) {
         if (this.map[y][x] === FieldEnum.BOMB) {
             this.detonate(x, y);
@@ -91,10 +99,6 @@ export class GameMap {
     placeBomb(x, y) {
         if (!this.outOfBonds(x, y) && this.map[y][x] !== FieldEnum.BOMB) {
             this.map[y][x] = FieldEnum.BOMB;
-            setTimeout(() => {
-                if (this.map[y][x] === FieldEnum.BOMB)
-                    this.detonate(x, y);
-            }, 1000);
         }
     }
 
