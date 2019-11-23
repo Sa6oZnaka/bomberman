@@ -110,4 +110,8 @@ export class Room {
         return true;
     }
 
+    hasUser(id){
+        return this.users.has(id);
+    }
+
 }

@@ -10,15 +10,12 @@ let users = new Map();
 let user = new User(0, 0, 0);
 let keys = new Map();
 let spawned = false;
+let died = false;
 
 export class Game extends Phaser.Scene {
 
     constructor() {
         super({key: "Game"});
-    }
-
-    preload() {
-        // load assets
     }
 
     create() {
@@ -47,6 +44,7 @@ export class Game extends Phaser.Scene {
         for (const user of users.values()) {
             user.draw(this.graphics);
         }
+        if(died) this.endGame();
     }
 
     move(x, y){
@@ -60,6 +58,10 @@ export class Game extends Phaser.Scene {
         console.log("SENT BOMB");
         socket.emit('placeBomb', new Point(user.x, user.y));
         gameMap.placeBomb(x, y);
+    }
+
+    endGame(){
+        this.scene.start("EndGame");
     }
 
 }
@@ -102,4 +104,10 @@ socket.on('newUser', function (data) {
 socket.on('disconnectUser', function (id) {
     if (!spawned) return;
     users.delete(id);
+});
+
+socket.on('killed' , function () {
+    console.warn("DEAD!!!");
+    died = true;
+    socket.disconnect();
 });
