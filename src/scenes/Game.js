@@ -10,7 +10,9 @@ let users = new Map();
 let user = new User(0, 0, 0);
 let keys = new Map();
 let spawned = false;
-let died = false;
+
+let result;
+let endGame = false;
 
 export class Game extends Phaser.Scene {
 
@@ -44,7 +46,7 @@ export class Game extends Phaser.Scene {
         for (const user of users.values()) {
             user.draw(this.graphics);
         }
-        if(died) this.endGame();
+        if(endGame) this.endGame(result);
     }
 
     move(x, y){
@@ -60,8 +62,8 @@ export class Game extends Phaser.Scene {
         gameMap.placeBomb(x, y);
     }
 
-    endGame(){
-        this.scene.start("EndGame");
+    endGame(result){
+        this.scene.start("EndGame", {result: result});
     }
 
 }
@@ -106,8 +108,8 @@ socket.on('disconnectUser', function (id) {
     users.delete(id);
 });
 
-socket.on('killed' , function () {
-    console.warn("DEAD!!!");
-    died = true;
+socket.on('endGame' , function (data) {
+    endGame = true;
+    result = data;
     socket.disconnect();
 });

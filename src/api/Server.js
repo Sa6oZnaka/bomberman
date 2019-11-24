@@ -2,11 +2,11 @@ import {Room} from "./Room.js";
 
 export class Server {
 
-    constructor(){
+    constructor() {
         this.rooms = new Map();
     }
 
-    spawn(socket){
+    spawn(socket) {
         let room;
         let connected = false;
         while (!connected) {
@@ -40,6 +40,7 @@ export class Server {
 
     move(socket, pos) {
         let room = this.getPlayerRoom(socket.id);
+        if(room === undefined) return;
         if (room.data.possibleMovement(socket.id, pos)) {
             room.data.movePlayer(socket.id, pos);
             let data = {
@@ -56,13 +57,17 @@ export class Server {
         }
     }
 
-    disconnect (socket) {
+    disconnect(socket) {
         let room = this.getPlayerRoom(socket.id);
         if (room !== undefined) { // after server restart client disconnect
             room.data.leave(socket.id);
             socket.to(room.id).emit("disconnectUser", socket.id);
             socket.leave(room.id);
             console.log(`ID ${socket.id} disconnected!`);
+            if (room.data.users.size === 0) {
+                this.rooms.delete(room.id);
+            }
+
         }
     }
 
@@ -73,33 +78,51 @@ export class Server {
             }
         }
         let roomID = this.rooms.size;
-        this.rooms.set("room" + roomID, new Room(0));
+        this.rooms.set("room" + roomID, new Room(2));
         return "room" + roomID;
     }
 
     getPlayerRoom(userID) {
-        for(let [id, room] of this.rooms){
-            if(room.hasUser(userID)){
-                return {id:id, data:room}
+        for (let [id, room] of this.rooms) {
+            if (room.hasUser(userID)) {
+                return {id: id, data: room}
             }
         }
     }
 
-    explode(socket, room, pos){
-        if(this.rooms.get(room).hasBomb(pos)){
-            socket.to(room).emit('explode', pos);
+    explode(socket, roomID, pos) {
+        if (this.rooms.has(roomID) && this.rooms.get(roomID).hasBomb(pos)) {
+            socket.to(roomID).emit('explode', pos);
             socket.emit('explode', pos);
-            this.disconnectUsers(socket, room, this.rooms.get(room).detonate(pos).getKilledPlayers());
+            let deadPlayers = this.rooms.get(roomID).detonate(pos).getKilledPlayers();
+            if (deadPlayers.length > 0) {
+                this.checkUsers(socket, roomID, deadPlayers);
+            }
         }
     }
 
-    disconnectUsers(socket, room, users){
-        for(let i = 0; i < users.length; i ++){
-            if(users[i] !== socket.id) {
-                socket.to(users[i]).emit('killed');
-            }else{
-                socket.emit('killed');
+    checkUsers(socket, roomID, deadUsers) {
+        let room = this.rooms.get(roomID);
+        let playersInRoom = room.users.size;
+        if (playersInRoom === deadUsers) {
+            this.disconnectUsers(socket, roomID, deadUsers, "Draw");
+        } else {
+            this.disconnectUsers(socket, roomID, deadUsers, "Lose");
+        }
+        console.log(room.users.size);
+        if (room.users.size === 1) {
+            this.disconnectUsers(socket, roomID, [room.users.keys().next().value], "Win");
+        }
+    }
+
+    disconnectUsers(socket, roomID, users, result) {
+        for (let i = 0; i < users.length; i++) {
+            if (socket.id !== users[i]) {
+                socket.to(roomID).emit('endGame', result);
+            } else {
+                socket.emit('endGame', result);
             }
+            this.rooms.get(roomID).leave(users[i]);
         }
     }
 
