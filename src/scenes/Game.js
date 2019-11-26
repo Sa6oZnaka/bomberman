@@ -57,7 +57,6 @@ export class Game extends Phaser.Scene {
     }
 
     placeBomb(x, y){
-        console.log("SENT BOMB");
         socket.emit('placeBomb', new Point(user.x, user.y));
         gameMap.placeBomb(x, y);
     }

@@ -34,45 +34,48 @@ export class Server {
 
     placeBomb(socket, pos) {
         let room = this.getPlayerRoom(socket.id);
-        if (room === undefined) return;
-        socket.to(room.id).emit('placeBomb', pos);
-        room.data.placeBomb(pos);
-        setTimeout(() => {
-            this.explode(socket, room.id, pos);
-        }, 1000);
+        if (room !== undefined) {
+            socket.to(room.id).emit('placeBomb', pos);
+            room.data.placeBomb(pos);
+            setTimeout(() => {
+                this.explode(socket, room.id, pos);
+            }, 1000);
+        }
     }
 
     move(socket, pos) {
         let room = this.getPlayerRoom(socket.id);
-        if (room === undefined) return;
-        if (room.data.possibleMovement(socket.id, pos)) {
-            room.data.movePlayer(socket.id, pos);
-            let data = {
-                'id': socket.id,
-                'pos': pos
-            };
-            socket.to(room.id).emit('move', data);
-        } else {
-            let data = {
-                'id': socket.id,
-                'pos': room.data.getLastPosition(socket.id)
-            };
-            socket.emit('move', data);
+        if (room !== undefined) {
+            if (room.data.possibleMovement(socket.id, pos)) {
+                room.data.movePlayer(socket.id, pos);
+                let data = {
+                    'id': socket.id,
+                    'pos': pos
+                };
+                socket.to(room.id).emit('move', data);
+            } else {
+                let data = {
+                    'id': socket.id,
+                    'pos': room.data.getLastPosition(socket.id)
+                };
+                socket.emit('move', data);
+            }
         }
     }
 
     disconnect(socket) {
         let room = this.getPlayerRoom(socket.id);
-        if (room === undefined) return;
-        if (room.data !== undefined) {
-            room.data.leave(socket.id);
-            if (room.data.users.size === 0) {
-                this.rooms.delete(room.id);
+        if (room !== undefined) {
+            if (room.data !== undefined) {
+                room.data.leave(socket.id);
+                if (room.data.users.size === 0) {
+                    this.rooms.delete(room.id);
+                }
             }
+            socket.to(room.id).emit("disconnectUser", socket.id);
+            socket.leave(room.id);
+            console.log(`ID ${socket.id} disconnected!`);
         }
-        socket.to(room.id).emit("disconnectUser", socket.id);
-        socket.leave(room.id);
-        console.log(`ID ${socket.id} disconnected!`);
     }
 
     getAvailableRoom() {
@@ -106,7 +109,7 @@ export class Server {
     checkUsers(socket, roomID, deadUsers) {
         let room = this.rooms.get(roomID);
         let playersInRoom = room.users.size;
-        if (playersInRoom === deadUsers) {
+        if (playersInRoom === deadUsers.length) {
             this.disconnectUsers(socket, roomID, deadUsers, "Draw");
         } else {
             this.disconnectUsers(socket, roomID, deadUsers, "Lose");
