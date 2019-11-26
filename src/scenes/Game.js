@@ -11,14 +11,13 @@ let user = new User(0, 0, 0);
 let keys = new Map();
 let spawned = false;
 
+let result;
+let endGame = false;
+
 export class Game extends Phaser.Scene {
 
     constructor() {
         super({key: "Game"});
-    }
-
-    preload() {
-        // load assets
     }
 
     create() {
@@ -36,33 +35,36 @@ export class Game extends Phaser.Scene {
         this.graphics.clear();
         gameMap.draw(this.graphics);
 
-        if (spawned && !user.inTransit) {
-            let newPosition;
-            if (keys.get('A').isDown && gameMap.map[user.y][user.x - 1] !== FieldEnum.STONE) {
-                newPosition = new Point(user.x - 1, user.y);
-            } else if (keys.get('S').isDown && gameMap.map[user.y + 1][user.x] !== FieldEnum.STONE) {
-                newPosition = new Point(user.x, user.y + 1);
-            } else if (keys.get('D').isDown && gameMap.map[user.y][user.x + 1] !== FieldEnum.STONE) {
-                newPosition = new Point(user.x + 1, user.y);
-            } else if (keys.get('W').isDown && gameMap.map[user.y - 1][user.x] !== FieldEnum.STONE) {
-                newPosition = new Point(user.x, user.y - 1);
-            }
-
-            if (keys.get('Space').isDown) {
-                socket.emit('placeBomb', new Point(user.x, user.y));
-                gameMap.placeBomb(user.x, user.y);
-            }
-            if (newPosition !== undefined) {
-                socket.emit('move', newPosition);
-                user.transit(newPosition.x, newPosition.y);
-            }
+        if (spawned) {
+            if (keys.get('A').isDown) this.move(user.x - 1, user.y);
+            if (keys.get('S').isDown) this.move(user.x, user.y + 1);
+            if (keys.get('D').isDown) this.move(user.x + 1, user.y);
+            if (keys.get('W').isDown) this.move(user.x, user.y - 1);
+            if (keys.get('Space').isDown) this.placeBomb(user.x, user.y);
         }
 
         for (const user of users.values()) {
-            this.graphics.fillStyle(0x802bFF, 1.0);
-            this.graphics.fillRect(user.x * user.size + user.transitionX, user.y * user.size + user.transitionY, 40, 40);
+            user.draw(this.graphics);
+        }
+        if(endGame) this.endGame(result);
+    }
+
+    move(x, y){
+        if(! user.inTransit && gameMap.map[y][x] === FieldEnum.EMPTY){
+            user.transit(x, y);
+            socket.emit('move', new Point(x, y));
         }
     }
+
+    placeBomb(x, y){
+        socket.emit('placeBomb', new Point(user.x, user.y));
+        gameMap.placeBomb(x, y);
+    }
+
+    endGame(result){
+        this.scene.start("EndGame", {result: result});
+    }
+
 }
 
 socket.on('spawn', function (data) {
@@ -85,16 +87,28 @@ socket.on('move', function (data) {
     users.get(data.id).transit(data.pos.x, data.pos.y);
 });
 
-socket.on('placeBomb', function (data) {
-    gameMap.placeBomb(data.pos.x, data.pos.y);
+socket.on('placeBomb', function (pos) {
+    console.log("PLACE BOMB");
+    gameMap.placeBomb(pos.x, pos.y);
+});
+
+socket.on('explode', function (pos) {
+    gameMap.detonate(pos.x, pos.y);
 });
 
 socket.on('newUser', function (data) {
     if (!spawned) return;
     users.set(data.id, new User(data.user.x, data.user.y, 40));
+    gameMap.clearForPlayer(data.user.x, data.user.y);
 });
 
 socket.on('disconnectUser', function (id) {
     if (!spawned) return;
     users.delete(id);
+});
+
+socket.on('endGame' , function (data) {
+    endGame = true;
+    result = data;
+    socket.disconnect();
 });

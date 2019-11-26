@@ -30,4 +30,9 @@ export class User {
         }, 100);
     }
 
+    draw(graphics){
+        graphics.fillStyle(0x802bFF, 1.0);
+        graphics.fillRect(this.x * this.size + this.transitionX, this.y * this.size + this.transitionY, 40, 40);
+    }
+
 }
