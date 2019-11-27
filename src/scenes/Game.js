@@ -4,15 +4,13 @@ import {Point} from "../api/Point.js";
 import {User} from "../api/User.js";
 
 let socket = io();
-let gameMap = new GameMap();
-let users = new Map();
-
-let user = new User(0, 0, 0);
-let keys = new Map();
-let spawned = false;
-
-let result;
-let endGame = false;
+let gameMap,
+    users,
+    user,
+    keys,
+    spawned,
+    result,
+    endGame;
 
 export class Game extends Phaser.Scene {
 
@@ -21,14 +19,21 @@ export class Game extends Phaser.Scene {
     }
 
     create() {
+        spawned = false;
+        gameMap = new GameMap();
+        users = new Map();
+        user = new User();
+        endGame = false;
         this.graphics = this.add.graphics();
-        socket.emit('spawn', "");
 
+        keys = new Map();
         keys.set('A', this.input.keyboard.addKey('A'));
         keys.set('S', this.input.keyboard.addKey('S'));
         keys.set('D', this.input.keyboard.addKey('D'));
         keys.set('W', this.input.keyboard.addKey('W'));
         keys.set('Space', this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE));
+
+        socket.connect().emit('spawn', "");
     }
 
     update() {
@@ -46,23 +51,23 @@ export class Game extends Phaser.Scene {
         for (const user of users.values()) {
             user.draw(this.graphics);
         }
-        if(endGame) this.endGame(result);
+        if (endGame) this.endGame(result);
     }
 
-    move(x, y){
-        if(! user.inTransit && gameMap.map[y][x] === FieldEnum.EMPTY){
+    move(x, y) {
+        if (!user.inTransit && gameMap.map[y][x] === FieldEnum.EMPTY) {
             user.transit(x, y);
             socket.emit('move', new Point(x, y));
         }
     }
 
-    placeBomb(x, y){
+    placeBomb(x, y) {
         socket.emit('placeBomb', new Point(user.x, user.y));
         gameMap.placeBomb(x, y);
     }
 
-    endGame(result){
-        this.scene.start("EndGame", {result: result});
+    endGame(result) {
+        this.scene.start("EndMenu", {result: result});
     }
 
 }
@@ -82,13 +87,14 @@ socket.on('move', function (data) {
     if (data.id === socket.id) {
         console.warn("Rollback detected!");
         user.inTransit = false;
+        user.transitionX = 0;
+        user.transitionY = 0;
     }
 
     users.get(data.id).transit(data.pos.x, data.pos.y);
 });
 
 socket.on('placeBomb', function (pos) {
-    console.log("PLACE BOMB");
     gameMap.placeBomb(pos.x, pos.y);
 });
 
@@ -107,7 +113,7 @@ socket.on('disconnectUser', function (id) {
     users.delete(id);
 });
 
-socket.on('endGame' , function (data) {
+socket.on('endGame', function (data) {
     endGame = true;
     result = data;
     socket.disconnect();

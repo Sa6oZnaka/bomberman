@@ -93,11 +93,15 @@ export class Room {
 
     getLastPosition(id){
         let user = this.users.get(id);
-        return new Point(user.x, user.y);
+        if(user !== undefined)
+            return new Point(user.x, user.y);
     }
 
     possibleMovement(id, pos) {
         let user = this.users.get(id);
+        if(user === undefined){
+            return false;
+        }
         if (user.inTransit) {
             return false;
         }
@@ -108,10 +112,6 @@ export class Room {
             return false;
         }
         return true;
-    }
-
-    hasUser(id){
-        return this.users.has(id);
     }
 
 }

@@ -34,9 +34,9 @@ export class Server {
 
     placeBomb(socket, pos) {
         let room = this.getPlayerRoom(socket.id);
-        if (room !== undefined) {
-            socket.to(room.id).emit('placeBomb', pos);
+        if (room.data !== undefined) {
             room.data.placeBomb(pos);
+            socket.to(room.id).emit('placeBomb', pos);
             setTimeout(() => {
                 this.explode(socket, room.id, pos);
             }, 1000);
@@ -45,7 +45,7 @@ export class Server {
 
     move(socket, pos) {
         let room = this.getPlayerRoom(socket.id);
-        if (room !== undefined) {
+        if (room.data !== undefined) {
             if (room.data.possibleMovement(socket.id, pos)) {
                 room.data.movePlayer(socket.id, pos);
                 let data = {
