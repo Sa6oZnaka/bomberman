@@ -9,27 +9,41 @@ export class Server {
     }
 
     spawn(socket) {
-        let room;
+        let roomID;
         let connected = false;
         while (!connected) {
-            room = this.getAvailableRoom();
-            if (this.rooms.get(room).connect(socket.id)) {
-                socket.join(room);
-                this.userRoom.set(socket.id, room);
+            roomID = this.getBestRoom();
+            if (this.rooms.get(roomID).connect(socket.id)) {
+                socket.join(roomID);
+                this.userRoom.set(socket.id, roomID);
                 connected = true;
             }
         }
-        let data = {
-            'map': this.rooms.get(room).getMap(),
-            'users': this.rooms.get(room).getUsers(),
-        };
-        let data2 = {
-            'id': socket.id,
-            'user': this.rooms.get(room).getUser(socket.id)
-        };
-
-        socket.emit('spawn', data);
-        socket.to(room).emit('newUser', data2);
+        let room = this.rooms.get(roomID);
+        if(room.waitForAllPlayers) {
+            if (room.users.size === room.userLimit) {
+                socket.emit('spawn', {
+                    'map': this.rooms.get(roomID).getMap(),
+                    'users': this.rooms.get(roomID).getUsers(),
+                });
+                for(let [key, data] of room.users){
+                    socket.to(key).emit('spawn', {
+                        'map': this.rooms.get(roomID).getMap(),
+                        'users': this.rooms.get(roomID).getUsers(),
+                    });
+                }
+                room.dontAllowJoin = true;
+            }
+        }else {
+            socket.emit('spawn', {
+                'map': this.rooms.get(roomID).getMap(),
+                'users': this.rooms.get(roomID).getUsers(),
+            });
+            socket.to(roomID).emit('newUser', {
+                'id': socket.id,
+                'user': this.rooms.get(roomID).getUser(socket.id)
+            });
+        }
     }
 
     placeBomb(socket, pos) {
@@ -71,6 +85,9 @@ export class Server {
                 if (room.data.users.size === 0) {
                     this.rooms.delete(room.id);
                 }
+                if (room.data.users.size === 1) {
+                    this.disconnectUsers(socket, room.id, [room.data.users.keys().next().value], "Win");
+                }
             }
             socket.to(room.id).emit("disconnectUser", socket.id);
             socket.leave(room.id);
@@ -78,15 +95,27 @@ export class Server {
         }
     }
 
-    getAvailableRoom() {
+    getBestRoom() {
+        let roomID,
+            roomPlayers = -1;
         for (let [key, room] of this.rooms.entries()) {
-            if (room.hasAvailableSlot()) {
-                return key;
+            if (room.hasAvailableSlot() && ! room.dontAllowJoin) {
+                if (room.users.size > roomPlayers) {
+                    roomID = key;
+                    roomPlayers = room.users.size;
+                }
             }
         }
+        if (roomPlayers === -1) {
+            roomID = this.createRoom();
+        }
+        return roomID;
+    }
+
+    createRoom() {
         let roomID = this.lastRoomId;
-        this.lastRoomId ++;
-        this.rooms.set("room" + roomID, new Room(2));
+        this.lastRoomId++;
+        this.rooms.set("room" + roomID, new Room(2, true));
         return "room" + roomID;
     }
 
@@ -113,9 +142,6 @@ export class Server {
             this.disconnectUsers(socket, roomID, deadUsers, "Draw");
         } else {
             this.disconnectUsers(socket, roomID, deadUsers, "Lose");
-        }
-        if (room.users.size === 1) {
-            this.disconnectUsers(socket, roomID, [room.users.keys().next().value], "Win");
         }
     }
 

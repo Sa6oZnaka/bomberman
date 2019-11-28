@@ -6,11 +6,13 @@ import {Point} from "./Point";
 
 export class Room {
 
-    constructor(userLimit){
+    constructor(userLimit, waitForAllPlayers){
         this.userLimit = userLimit;
 
         this.gameMap = new GameMap(config.MAP_SIZE_X, config.MAP_SIZE_Y);
         this.users = new Map();
+        this.waitForAllPlayers = waitForAllPlayers;
+        this.dontAllowJoin = false;
     }
 
     placeBomb(point){
