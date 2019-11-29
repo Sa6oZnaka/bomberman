@@ -1,12 +1,13 @@
 import {GameMap} from "./GameMap.js";
 import {config} from "../config/config.js";
 import {User} from "./User.js";
-import {FieldEnum} from "../enums/FieldEnum";
-import {Point} from "./Point";
+import {FieldEnum} from "../enums/FieldEnum.js";
+import {Point} from "./Point.js";
 
 export class Room {
 
-    constructor(userLimit, waitForAllPlayers){
+    constructor(type, userLimit, waitForAllPlayers){
+        this.type = type;
         this.userLimit = userLimit;
 
         this.gameMap = new GameMap(config.MAP_SIZE_X, config.MAP_SIZE_Y);

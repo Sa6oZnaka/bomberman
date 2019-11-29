@@ -18,6 +18,10 @@ export class Game extends Phaser.Scene {
         super({key: "Game"});
     }
 
+    init(data){
+        this.type = data.type;
+    }
+
     create() {
         spawned = false;
         gameMap = new GameMap();
@@ -33,7 +37,7 @@ export class Game extends Phaser.Scene {
         keys.set('W', this.input.keyboard.addKey('W'));
         keys.set('Space', this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE));
 
-        socket.connect().emit('spawn', "");
+        socket.connect().emit('spawn', this.type);
     }
 
     update() {

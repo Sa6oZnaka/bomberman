@@ -1,4 +1,6 @@
 import {Room} from "./Room.js";
+import {RoomEnum} from "../enums/RoomEnum";
+import {RoomFactory} from "../factories/RoomFactory";
 
 export class Server {
 
@@ -8,11 +10,12 @@ export class Server {
         this.lastRoomId = 0;
     }
 
-    spawn(socket) {
+    spawn(socket, type) {
+        console.log("type:" + type);
         let roomID;
         let connected = false;
         while (!connected) {
-            roomID = this.getBestRoom();
+            roomID = this.getBestRoom(type);
             if (this.rooms.get(roomID).connect(socket.id)) {
                 socket.join(roomID);
                 this.userRoom.set(socket.id, roomID);
@@ -20,13 +23,13 @@ export class Server {
             }
         }
         let room = this.rooms.get(roomID);
-        if(room.waitForAllPlayers) {
+        if (room.waitForAllPlayers) {
             if (room.users.size === room.userLimit) {
                 socket.emit('spawn', {
                     'map': this.rooms.get(roomID).getMap(),
                     'users': this.rooms.get(roomID).getUsers(),
                 });
-                for(let [key, data] of room.users){
+                for (let [key, data] of room.users) {
                     socket.to(key).emit('spawn', {
                         'map': this.rooms.get(roomID).getMap(),
                         'users': this.rooms.get(roomID).getUsers(),
@@ -34,7 +37,7 @@ export class Server {
                 }
                 room.dontAllowJoin = true;
             }
-        }else {
+        } else {
             socket.emit('spawn', {
                 'map': this.rooms.get(roomID).getMap(),
                 'users': this.rooms.get(roomID).getUsers(),
@@ -45,6 +48,7 @@ export class Server {
             });
         }
     }
+
 
     placeBomb(socket, pos) {
         let room = this.getPlayerRoom(socket.id);
@@ -95,11 +99,11 @@ export class Server {
         }
     }
 
-    getBestRoom() {
+    getBestRoom(type) {
         let roomID,
             roomPlayers = -1;
         for (let [key, room] of this.rooms.entries()) {
-            if (room.hasAvailableSlot() && ! room.dontAllowJoin) {
+            if (room.type === type && room.hasAvailableSlot() && !room.dontAllowJoin) {
                 if (room.users.size > roomPlayers) {
                     roomID = key;
                     roomPlayers = room.users.size;
@@ -107,15 +111,21 @@ export class Server {
             }
         }
         if (roomPlayers === -1) {
-            roomID = this.createRoom();
+            roomID = this.createRoom(type);
         }
         return roomID;
     }
 
-    createRoom() {
+    createRoom(type) {
         let roomID = this.lastRoomId;
         this.lastRoomId++;
-        this.rooms.set("room" + roomID, new Room(2, true));
+        console.log(type);
+        if(type === RoomEnum.COMPETITIVE) {
+            this.rooms.set("room" + roomID, RoomFactory.competitive());
+        }
+        if(type === RoomEnum.CASUAL) {
+            this.rooms.set("room" + roomID, RoomFactory.casual());
+        }
         return "room" + roomID;
     }
 

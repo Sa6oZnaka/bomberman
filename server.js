@@ -18,8 +18,8 @@ let server = new Server();
 io.on('connection', function (socket) {
     console.log(`ID ${socket.id} connected!`);
 
-    socket.on('spawn', function (){
-        server.spawn(socket);
+    socket.on('spawn', function (type){
+        server.spawn(socket, type);
     });
 
     socket.on('placeBomb', function (pos) {
