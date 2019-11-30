@@ -3,7 +3,7 @@ import {FieldEnum} from "../enums/FieldEnum.js";
 import {Point} from "../api/Point.js";
 import {User} from "../api/User.js";
 
-let socket = io();
+export let socket = io();
 let gameMap,
     users,
     user,
@@ -19,7 +19,7 @@ export class Game extends Phaser.Scene {
     }
 
     init(data){
-        this.type = data.type;
+        this.room = data.room;
     }
 
     create() {
@@ -37,7 +37,7 @@ export class Game extends Phaser.Scene {
         keys.set('W', this.input.keyboard.addKey('W'));
         keys.set('Space', this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE));
 
-        socket.connect().emit('spawn', this.type);
+        socket.connect().emit('spawn', this.room);
     }
 
     update() {

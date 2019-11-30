@@ -43,10 +43,8 @@ export class Room {
         this.users.get(id).transit(point.x, point.y);
     }
 
-    hasAvailableSlot(){
-        if(this.userLimit === 0)
-            return true;
-        return this.users.size < this.userLimit;
+    canBeJoined(){
+        return !this.dontAllowJoin && (this.users.size < this.userLimit || this.userLimit === 0);
     }
 
     createNewUser(){
@@ -70,7 +68,10 @@ export class Room {
     }
 
     connect(id){
-        if(this.hasAvailableSlot()) {
+        if(this.users.has(id)){
+            return false;
+        }
+        if(this.canBeJoined()) {
             this.users.set(id, this.createNewUser());
             return true
         }

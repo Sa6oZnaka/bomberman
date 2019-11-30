@@ -11,4 +11,13 @@ export class RoomFactory {
         return new Room(RoomEnum.CASUAL, 8, false);
     }
 
+    static getByType(type){
+        if(type === RoomEnum.CASUAL){
+            return this.casual();
+        }
+        if(type === RoomEnum.COMPETITIVE){
+            return this.competitive();
+        }
+    }
+
 }

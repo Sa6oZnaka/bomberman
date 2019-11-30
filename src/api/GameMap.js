@@ -15,7 +15,7 @@ export class GameMap {
                 if (i === 0 || j === 0 || i === y - 1 || j === x - 1 || (i % 2 === 0 && j % 2 === 0)) {
                     map[i][j] = FieldEnum.STONE;
                 } else {
-                    if (Math.random() < 0.7) {
+                    if (Math.random() < 0) {
                         map[i][j] = FieldEnum.BARRICADE;
                     } else {
                         map[i][j] = FieldEnum.EMPTY;
