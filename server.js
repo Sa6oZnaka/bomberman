@@ -8,6 +8,7 @@ const path = require('path');
 let io = require('socket.io')(http);
 
 app.use('/src', express.static('src'));
+app.use('/assets', express.static('assets'));
 
 app.get('/', function (req, res) {
     res.sendFile(path.join(__dirname + '/index.html'));
