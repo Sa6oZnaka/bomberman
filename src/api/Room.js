@@ -1,16 +1,19 @@
 import {GameMap} from "./GameMap.js";
 import {config} from "../config/config.js";
 import {User} from "./User.js";
-import {FieldEnum} from "../enums/FieldEnum";
-import {Point} from "./Point";
+import {FieldEnum} from "../enums/FieldEnum.js";
+import {Point} from "./Point.js";
 
 export class Room {
 
-    constructor(userLimit){
+    constructor(type, userLimit, waitForAllPlayers){
+        this.type = type;
         this.userLimit = userLimit;
 
         this.gameMap = new GameMap(config.MAP_SIZE_X, config.MAP_SIZE_Y);
         this.users = new Map();
+        this.waitForAllPlayers = waitForAllPlayers;
+        this.dontAllowJoin = false;
     }
 
     placeBomb(point){
@@ -40,10 +43,8 @@ export class Room {
         this.users.get(id).transit(point.x, point.y);
     }
 
-    hasAvailableSlot(){
-        if(this.userLimit === 0)
-            return true;
-        return this.users.size < this.userLimit;
+    canBeJoined(){
+        return !this.dontAllowJoin && (this.users.size < this.userLimit || this.userLimit === 0);
     }
 
     createNewUser(){
@@ -67,7 +68,10 @@ export class Room {
     }
 
     connect(id){
-        if(this.hasAvailableSlot()) {
+        if(this.users.has(id)){
+            return false;
+        }
+        if(this.canBeJoined()) {
             this.users.set(id, this.createNewUser());
             return true
         }
@@ -93,11 +97,15 @@ export class Room {
 
     getLastPosition(id){
         let user = this.users.get(id);
-        return new Point(user.x, user.y);
+        if(user !== undefined)
+            return new Point(user.x, user.y);
     }
 
     possibleMovement(id, pos) {
         let user = this.users.get(id);
+        if(user === undefined){
+            return false;
+        }
         if (user.inTransit) {
             return false;
         }
@@ -108,10 +116,6 @@ export class Room {
             return false;
         }
         return true;
-    }
-
-    hasUser(id){
-        return this.users.has(id);
     }
 
 }

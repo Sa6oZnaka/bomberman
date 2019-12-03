@@ -1,7 +1,7 @@
-export class EndGame extends Phaser.Scene {
+export class EndMenu extends Phaser.Scene {
 
     constructor() {
-        super({key: "EndGame"});
+        super({key: "EndMenu"});
     }
 
     init(data){
@@ -14,6 +14,9 @@ export class EndGame extends Phaser.Scene {
 
     create() {
         this.add.text(0, 0, this.result, { fontFamily: '"Roboto Condensed"' });
+        setTimeout(() => {
+            this.scene.start("MainMenu");
+        }, 1000);
     }
 
     update() {

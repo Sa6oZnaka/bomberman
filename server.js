@@ -8,6 +8,7 @@ const path = require('path');
 let io = require('socket.io')(http);
 
 app.use('/src', express.static('src'));
+app.use('/assets', express.static('assets'));
 
 app.get('/', function (req, res) {
     res.sendFile(path.join(__dirname + '/index.html'));
@@ -15,27 +16,31 @@ app.get('/', function (req, res) {
 
 let server = new Server();
 
-io.on('connection', function (socket) {
+io.on('connection', (socket) => {
     console.log(`ID ${socket.id} connected!`);
 
-    socket.on('spawn', function (){
-        server.spawn(socket);
+    socket.on('spawn', (room) => {
+        server.spawn(socket, room);
     });
 
-    socket.on('placeBomb', function (pos) {
+    socket.on('placeBomb', (pos) => {
         server.placeBomb(socket, pos);
     });
 
-    socket.on('move', function (pos) {
+    socket.on('move', (pos) => {
         server.move(socket, pos);
     });
 
-    socket.on('disconnect', function () {
+    socket.on('disconnect', () => {
         server.disconnect(socket);
     });
+    socket.on('findGame', (type) => {
+        server.findGame(socket, type);
+    });
+
 });
 
 let port = process.env.PORT || config.SERVER_PORT;
-http.listen(port, function () {
+http.listen(port, () => {
     console.log("listening on port " + port);
 });

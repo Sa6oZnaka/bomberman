@@ -1,4 +1,4 @@
-import {Room} from "./Room.js";
+import {RoomFactory} from "../factories/RoomFactory";
 
 export class Server {
 
@@ -8,35 +8,68 @@ export class Server {
         this.lastRoomId = 0;
     }
 
-    spawn(socket) {
-        let room;
+    spawn(socket, roomID) {
+        let room = this.rooms.get(roomID);
+        if(room !== undefined) {
+            if (room.waitForAllPlayers) {
+                if (room.users.size === room.userLimit) {
+                    socket.emit('spawn', {
+                        'map': room.getMap(),
+                        'users': room.getUsers(),
+                    });
+                    for (let [key, data] of room.users) {
+                        socket.to(key).emit('spawn', {
+                            'map': room.getMap(),
+                            'users': room.getUsers(),
+                        });
+                    }
+                    room.dontAllowJoin = true;
+                }
+            } else {
+                socket.emit('spawn', {
+                    'map': room.getMap(),
+                    'users': room.getUsers(),
+                });
+                socket.to(roomID).emit('newUser', {
+                    'id': socket.id,
+                    'user': room.getUser(socket.id)
+                });
+            }
+        }
+    }
+
+    findGame(socket, type){
+        if(this.userRoom.has(socket.id)) return;
+        let roomID;
         let connected = false;
         while (!connected) {
-            room = this.getAvailableRoom();
-            if (this.rooms.get(room).connect(socket.id)) {
-                socket.join(room);
-                this.userRoom.set(socket.id, room);
+            roomID = this.getBestRoom(type);
+            if (this.rooms.get(roomID).connect(socket.id)) {
+                socket.join(roomID);
+                this.userRoom.set(socket.id, roomID);
                 connected = true;
             }
         }
-        let data = {
-            'map': this.rooms.get(room).getMap(),
-            'users': this.rooms.get(room).getUsers(),
-        };
-        let data2 = {
-            'id': socket.id,
-            'user': this.rooms.get(room).getUser(socket.id)
-        };
-
-        socket.emit('spawn', data);
-        socket.to(room).emit('newUser', data2);
+        let room = this.rooms.get(roomID);
+        if (room.waitForAllPlayers) {
+            if (room.users.size === room.userLimit) {
+                socket.emit('foundGame', roomID);
+                for (let [key, data] of room.users) {
+                    socket.to(key).emit('foundGame', roomID);
+                }
+                room.dontAllowJoin = true;
+            }
+        } else {
+            socket.emit('foundGame', roomID);
+        }
     }
+
 
     placeBomb(socket, pos) {
         let room = this.getPlayerRoom(socket.id);
-        if (room !== undefined) {
-            socket.to(room.id).emit('placeBomb', pos);
+        if (room.data !== undefined) {
             room.data.placeBomb(pos);
+            socket.to(room.id).emit('placeBomb', pos);
             setTimeout(() => {
                 this.explode(socket, room.id, pos);
             }, 1000);
@@ -45,7 +78,7 @@ export class Server {
 
     move(socket, pos) {
         let room = this.getPlayerRoom(socket.id);
-        if (room !== undefined) {
+        if (room.data !== undefined) {
             if (room.data.possibleMovement(socket.id, pos)) {
                 room.data.movePlayer(socket.id, pos);
                 let data = {
@@ -65,28 +98,42 @@ export class Server {
 
     disconnect(socket) {
         let room = this.getPlayerRoom(socket.id);
-        if (room !== undefined) {
-            if (room.data !== undefined) {
-                room.data.leave(socket.id);
-                if (room.data.users.size === 0) {
-                    this.rooms.delete(room.id);
-                }
+        if (room.data !== undefined) {
+            room.data.leave(socket.id);
+            if (room.data.users.size === 0) {
+                this.rooms.delete(room.id);
             }
-            socket.to(room.id).emit("disconnectUser", socket.id);
-            socket.leave(room.id);
-            console.log(`ID ${socket.id} disconnected!`);
+            if (room.data.users.size === 1) {
+                this.disconnectUsers(socket, room.id, [room.data.users.keys().next().value], "Win");
+            }
         }
+        this.userRoom.delete(socket.id);
+        socket.to(room.id).emit("disconnectUser", socket.id);
+        socket.leave(room.id);
+        console.log(`ID ${socket.id} disconnected!`);
     }
 
-    getAvailableRoom() {
+    getBestRoom(type) {
+        let roomID,
+            roomPlayers = -1;
         for (let [key, room] of this.rooms.entries()) {
-            if (room.hasAvailableSlot()) {
-                return key;
+            if (room.type === type && room.canBeJoined()) {
+                if (room.users.size > roomPlayers) {
+                    roomID = key;
+                    roomPlayers = room.users.size;
+                }
             }
         }
+        if (roomPlayers === -1) {
+            roomID = this.createRoom(type);
+        }
+        return roomID;
+    }
+
+    createRoom(type) {
         let roomID = this.lastRoomId;
-        this.lastRoomId ++;
-        this.rooms.set("room" + roomID, new Room(2));
+        this.lastRoomId++;
+        this.rooms.set("room" + roomID, RoomFactory.getByType(type));
         return "room" + roomID;
     }
 
@@ -108,21 +155,17 @@ export class Server {
 
     checkUsers(socket, roomID, deadUsers) {
         let room = this.rooms.get(roomID);
-        let playersInRoom = room.users.size;
-        if (playersInRoom === deadUsers.length) {
+        if (room.users.size === deadUsers.length) {
             this.disconnectUsers(socket, roomID, deadUsers, "Draw");
         } else {
             this.disconnectUsers(socket, roomID, deadUsers, "Lose");
-        }
-        if (room.users.size === 1) {
-            this.disconnectUsers(socket, roomID, [room.users.keys().next().value], "Win");
         }
     }
 
     disconnectUsers(socket, roomID, users, result) {
         for (let i = 0; i < users.length; i++) {
             if (socket.id !== users[i]) {
-                socket.to(roomID).emit('endGame', result);
+                socket.to(users[i]).emit('endGame', result);
             } else {
                 socket.emit('endGame', result);
             }
