@@ -1,5 +1,5 @@
 import {GameMap} from "./GameMap.js";
-import {config} from "../config/config.js";
+import {config} from "../../config/config.js";
 import {User} from "./User.js";
 import {FieldEnum} from "../enums/FieldEnum.js";
 import {Point} from "./Point.js";
