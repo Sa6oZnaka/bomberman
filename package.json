@@ -2,10 +2,10 @@
   "name": "bomberman",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "src/server/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node -r esm server.js"
+    "start": "node -r esm src/server/server.js"
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
     "mysql": "^2.17.1",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.3.0",
+    "body-parser": "latest"
   }
 }

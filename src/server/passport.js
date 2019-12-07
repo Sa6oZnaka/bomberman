@@ -2,7 +2,7 @@ let LocalStrategy = require("passport-local").Strategy;
 
 let mysql = require('mysql');
 let bcrypt = require('bcrypt-nodejs');
-let dbconfig = require('./config/dbconfig');
+let dbconfig = require('../../config/dbconfig');
 let connection = mysql.createConnection(dbconfig);
 
 connection.query('USE ' + dbconfig.database);
