@@ -13,7 +13,6 @@ let express = require('express')
 
 require('./passport')(passport);
 require('./gameEvents')(io);
-require('./route')(app, passport);
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({
@@ -32,6 +31,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 app.use(express.static('public'));
+require('./route')(app, passport);
 
 app.use('/src', express.static('src'));
 app.use('/assets', express.static('assets'));
