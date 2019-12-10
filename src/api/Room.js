@@ -47,10 +47,10 @@ export class Room {
         return !this.dontAllowJoin && (this.users.size < this.userLimit || this.userLimit === 0);
     }
 
-    createNewUser(){
+    createNewUser(username){
         let pos = this.getNewPlayerPosition();
         this.gameMap.clearForPlayer(pos.x, pos.y);
-        return new User(pos.x, pos.y, config.GRID_CELL_SIZE);
+        return new User(username, pos.x, pos.y, config.GRID_CELL_SIZE);
     }
 
     getNewPlayerPosition(){
@@ -67,12 +67,12 @@ export class Room {
             Math.floor(Math.random() * (maxY - minY) / 2) * 2 + minY);
     }
 
-    connect(id){
+    connect(id, username){
         if(this.users.has(id)){
             return false;
         }
         if(this.canBeJoined()) {
-            this.users.set(id, this.createNewUser());
+            this.users.set(id, this.createNewUser(username));
             return true
         }
         return false;

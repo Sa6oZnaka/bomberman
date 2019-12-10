@@ -2,29 +2,25 @@ exports = module.exports = function (io, serverRooms) {
     io.sockets.on('connection', function (socket) {
         console.log(`ID ${socket.id} connected!`);
 
-        socket.on('findGame', (type) => {
-            let roomID;
-            let connected = false;
-            while (!connected) {
-                roomID = serverRooms.getBestRoom(type);
-                if (serverRooms.rooms.get(roomID).connect(socket.id)) {
-                    socket.join(roomID);
-                    serverRooms.joinRoom(roomID, socket.id);
-                    connected = true;
-                }
-            }
-            let room = serverRooms.rooms.get(roomID);
-            if (room.waitForAllPlayers) {
-                if (room.users.size === room.userLimit) {
+        socket.on('findGame', (data) => {
+            if (!serverRooms.playerRooms.has(socket.id))
+                findGame(data.type, data.username);
+        });
+
+        function findGame(type, username) {
+            let roomID = serverRooms.getBestRoom(type);
+            if (serverRooms.rooms.get(roomID).connect(socket.id, username)) {
+                socket.join(roomID);
+                serverRooms.playerRooms.set(socket.id, roomID);
+                let room = serverRooms.rooms.get(roomID);
+                if (!room.waitForAllPlayers) {
                     socket.emit('foundGame', roomID);
-                    for (let [key, data] of room.users) {
-                        socket.to(key).emit('foundGame', roomID);
-                    }
-                    room.dontAllowJoin = true;
+                } else if (room.users.size === room.userLimit) {
+                    io.to(roomID).emit('foundGame', roomID);
                 }
             } else {
-                socket.emit('foundGame', roomID);
+                findGame(type, username);
             }
-        });
+        }
     });
 };

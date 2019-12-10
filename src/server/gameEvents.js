@@ -5,21 +5,7 @@ exports = module.exports = function (io, serverRooms) {
         socket.on('spawn', (roomID) => {
             let room = serverRooms.rooms.get(roomID);
             if (room !== undefined) {
-                if (room.waitForAllPlayers) {
-                    if (room.users.size === room.userLimit) {
-                        socket.emit('spawn', {
-                            'map': room.getMap(),
-                            'users': room.getUsers(),
-                        });
-                        for (let [key, data] of room.users) {
-                            socket.to(key).emit('spawn', {
-                                'map': room.getMap(),
-                                'users': room.getUsers(),
-                            });
-                        }
-                        room.dontAllowJoin = true;
-                    }
-                } else {
+                if (!room.waitForAllPlayers) {
                     socket.emit('spawn', {
                         'map': room.getMap(),
                         'users': room.getUsers(),
@@ -28,18 +14,30 @@ exports = module.exports = function (io, serverRooms) {
                         'id': socket.id,
                         'user': room.getUser(socket.id)
                     });
+                } else if (room.users.size === room.userLimit) {
+                    io.to(roomID).emit('spawn', {
+                        'map': room.getMap(),
+                        'users': room.getUsers(),
+                    });
+                    room.dontAllowJoin = true;
                 }
             }
         });
 
-        socket.on('placeBomb', (pos) => {
+        socket.on('placeBomb', () => {
             let roomID = serverRooms.playerRooms.get(socket.id);
             let room = serverRooms.rooms.get(roomID);
             if (room !== undefined) {
-                room.placeBomb(pos);
-                socket.to(roomID).emit('placeBomb', pos);
+                let user = room.getUser(socket.id);
+                if (user === undefined) return;
+                let userPos = {
+                    x: user.x,
+                    y: user.y
+                };
+                room.placeBomb(userPos);
+                io.to(roomID).emit('placeBomb', userPos);
                 setTimeout(() => {
-                    explode(roomID, pos);
+                    explode(roomID, userPos);
                 }, 1000);
             }
         });
@@ -66,11 +64,11 @@ exports = module.exports = function (io, serverRooms) {
             let roomID = serverRooms.playerRooms.get(socket.id);
             if (roomID === undefined) return;
             let room = serverRooms.rooms.get(roomID);
+            if (room === undefined) return;
             room.leave(socket.id);
             if (room.users.size === 0) {
                 serverRooms.rooms.delete(roomID);
-            }
-            if (room.users.size === 1) {
+            } else if (room.users.size === 1) {
                 disconnectUsers(socket, roomID, [room.users.keys().next().value], "Win");
             }
             serverRooms.playerRooms.delete(socket.id);
