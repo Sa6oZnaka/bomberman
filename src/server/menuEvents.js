@@ -13,9 +13,9 @@ exports = module.exports = function (io, serverRooms) {
                 socket.join(roomID);
                 serverRooms.playerRooms.set(socket.id, roomID);
                 let room = serverRooms.rooms.get(roomID);
-                if (!room.waitForAllPlayers) {
+                if (room.users.size > room.required) {
                     socket.emit('foundGame', roomID);
-                } else if (room.users.size === room.userLimit) {
+                } else if (room.users.size === room.required) {
                     io.to(roomID).emit('foundGame', roomID);
                 }
             } else {

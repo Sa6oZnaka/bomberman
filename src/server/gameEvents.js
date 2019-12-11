@@ -5,7 +5,7 @@ exports = module.exports = function (io, serverRooms) {
         socket.on('spawn', (roomID) => {
             let room = serverRooms.rooms.get(roomID);
             if (room !== undefined) {
-                if (!room.waitForAllPlayers) {
+                if (room.users.size > room.required) {
                     socket.emit('spawn', {
                         'map': room.getMap(),
                         'users': room.getUsers(),
@@ -14,12 +14,13 @@ exports = module.exports = function (io, serverRooms) {
                         'id': socket.id,
                         'user': room.getUser(socket.id)
                     });
-                } else if (room.users.size === room.userLimit) {
+                } else if (room.users.size === room.required) {
                     io.to(roomID).emit('spawn', {
                         'map': room.getMap(),
                         'users': room.getUsers(),
                     });
-                    room.dontAllowJoin = true;
+                    if (!this.joinAfterStart)
+                        this.dontAllowJoin = true;
                 }
             }
         });
@@ -88,11 +89,7 @@ exports = module.exports = function (io, serverRooms) {
 
         function disconnectUsers(socket, roomID, users, result) {
             for (let i = 0; i < users.length; i++) {
-                if (socket.id !== users[i]) {
-                    socket.to(users[i]).emit('endGame', result);
-                } else {
-                    socket.emit('endGame', result);
-                }
+                io.to(users[i]).emit('endGame', result);
                 if (serverRooms.rooms.get(roomID) !== undefined)
                     serverRooms.rooms.get(roomID).leave(users[i]);
             }
