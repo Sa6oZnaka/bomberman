@@ -26,6 +26,17 @@ export class GameMap {
         return map;
     }
 
+    getMap(){
+        let map = [];
+        for (let i = 0; i < this.map.length; i++) {
+            map[i] = [];
+            for (let j = 0; j < this.map[0].length; j++) {
+                map[i][j] = this.map[i][j];
+            }
+        }
+        return map;
+    }
+
     static getNeighbors(x, y) {
         return [new Point(x - 1, y), new Point(x + 1, y), new Point(x, y - 1), new Point(x, y + 1)];
     }

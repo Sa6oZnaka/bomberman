@@ -19,8 +19,9 @@ exports = module.exports = function (io, serverRooms) {
                         'map': room.getMap(),
                         'users': room.getUsers(),
                     });
-                    if (!this.joinAfterStart)
-                        this.dontAllowJoin = true;
+                    room.beginRecording();
+                    if (!room.joinAfterStart)
+                        room.dontAllowJoin = true;
                 }
             }
         });
@@ -35,6 +36,7 @@ exports = module.exports = function (io, serverRooms) {
                     x: user.x,
                     y: user.y
                 };
+                if(room.hasBomb(userPos)) return;
                 room.placeBomb(userPos);
                 io.to(roomID).emit('placeBomb', userPos);
                 setTimeout(() => {
@@ -68,7 +70,7 @@ exports = module.exports = function (io, serverRooms) {
             if (room === undefined) return;
             room.leave(socket.id);
             if (room.users.size === 0) {
-                serverRooms.rooms.delete(roomID);
+                serverRooms.removeRoom(roomID);
             } else if (room.users.size === 1) {
                 disconnectUsers(socket, roomID, [room.users.keys().next().value], "Win");
             }

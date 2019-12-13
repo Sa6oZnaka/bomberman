@@ -1,5 +1,6 @@
 import {RoomEnum} from "../enums/RoomEnum.js";
 import {socket} from "./Game.js";
+import {replayData} from "../../assets/replay.js";
 
 let room = null;
 
@@ -17,6 +18,13 @@ export class MainMenu extends Phaser.Scene {
     create() {
         this.text = this.add.text(10, 10, '', { fill: '#00ff00' });
         this.graphics = this.add.graphics();
+
+        this.add.text(20, 40, 'Button 1 - Casual, Button 2 - Competitive', {
+            fill : '#ffffff'
+        });
+        this.add.text(20, 240, 'Button 3 - Replay', {
+            fill : '#ffffff'
+        });
 
         let userName = document.getElementById('username').value;
         this.add.text(0, 0, 'Logged in as: ' + userName, { fontFamily: '"Roboto Condensed"' });
@@ -38,15 +46,19 @@ export class MainMenu extends Phaser.Scene {
             } )
             .on('pointerover', () => this.buttonCompetitive.setTexture('button', 2) )
             .on('pointerout', () => this.buttonCompetitive.setTexture('button', 1) );
+
+        this.buttonReplay = this.add.sprite(100, 300, "button", 1)
+            .setInteractive()
+            .on('pointerdown', () => {
+                this.buttonReplay.setTexture('button', 0);
+                this.scene.start("Replay", replayData);
+            } )
+            .on('pointerover', () => this.buttonReplay.setTexture('button', 2) )
+            .on('pointerout', () => this.buttonReplay.setTexture('button', 1) );
+
     }
 
     update() {
-        this.graphics.clear();
-
-        this.add.text(20, 40, 'Button 1 - Casual, Button 2 - Competitive', {
-            fill : '#ffffff'
-        });
-
         if(room !== null){
             this.scene.start("Game", {room: room});
         }

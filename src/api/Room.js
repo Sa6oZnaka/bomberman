@@ -2,6 +2,8 @@ import {config} from "../../config/config.js";
 import {User} from "./User.js";
 import {FieldEnum} from "../enums/FieldEnum.js";
 import {Point} from "./Point.js";
+import {GameRecorder} from "./GameRecorder";
+import {ActionEnum} from "../enums/ActionEnum";
 
 export class Room {
 
@@ -9,11 +11,18 @@ export class Room {
         this.type = type;
         this.gameMap = gameMap;
         this.users = new Map();
+        this.gameRecorder = null;
 
         this.joinAfterStart = joinAfterStart;
         this.userLimit = userLimit; // max players that can join
         this.required = required; // required to start a game
         this.dontAllowJoin = false;
+    }
+
+    beginRecording() {
+        console.log("Started!");
+        if (this.gameRecorder === null)
+            this.gameRecorder = new GameRecorder(this.getMap(), this.getUsers());
     }
 
     getUsers() {
@@ -25,7 +34,7 @@ export class Room {
     }
 
     getMap() {
-        return this.gameMap.map;
+        return this.gameMap.getMap();
     }
 
     getLastPosition(id) {
@@ -45,6 +54,7 @@ export class Room {
     }
 
     placeBomb(point) {
+        this.gameRecorder.addAction(ActionEnum.PLACE_BOMB, {point: point});
         this.gameMap.placeBomb(point.x, point.y);
     }
 
@@ -58,6 +68,7 @@ export class Room {
     }
 
     movePlayer(id, point) {
+        this.gameRecorder.addAction(ActionEnum.MOVE, {id: id, point: point});
         this.users.get(id).transit(point.x, point.y);
     }
 

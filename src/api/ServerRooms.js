@@ -8,13 +8,6 @@ export class ServerRooms {
         this.lastRoomID = 0;
     }
 
-    joinRoom(roomID, userID) {
-        if (this.rooms.has(roomID)) {
-            this.playerRooms.set(userID, roomID);
-            this.rooms.get(roomID).connect(userID);
-        }
-    }
-
     disconnect(userID) {
         let roomID = this.playerRooms.get(userID);
         if (this.rooms.has(roomID)) {
@@ -25,6 +18,11 @@ export class ServerRooms {
     createRoom(type) {
         this.rooms.set(++this.lastRoomID, RoomFactory.getByType(type));
         return this.lastRoomID;
+    }
+
+    removeRoom(roomID){
+        console.log(this.rooms.get(roomID).gameRecorder.export());
+        this.rooms.delete(roomID);
     }
 
     leave(roomID) {
