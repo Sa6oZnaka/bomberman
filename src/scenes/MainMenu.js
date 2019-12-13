@@ -18,6 +18,9 @@ export class MainMenu extends Phaser.Scene {
         this.text = this.add.text(10, 10, '', { fill: '#00ff00' });
         this.graphics = this.add.graphics();
 
+        let userName = document.getElementById('username').value;
+        this.add.text(0, 0, 'Logged in as: ' + userName, { fontFamily: '"Roboto Condensed"' });
+
         this.buttonCasual = this.add.sprite(100, 100, "button", 1)
             .setInteractive()
             .on('pointerdown', () => {
@@ -49,8 +52,11 @@ export class MainMenu extends Phaser.Scene {
         }
     }
 
-    searchGame(type){
-        socket.connect().emit('findGame', type);
+    searchGame(type, username){
+        socket.connect().emit('findGame', {
+            type: type,
+            username: username
+        });
         this.text.setText([
             'Searching for games...'
         ]);
