@@ -21,7 +21,6 @@ export class ServerRooms {
     }
 
     removeRoom(roomID){
-        console.log(this.rooms.get(roomID).gameRecorder.export());
         this.rooms.delete(roomID);
     }
 

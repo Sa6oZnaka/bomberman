@@ -29,6 +29,14 @@ export class Room {
         return JSON.stringify(Array.from(this.users.entries()));
     }
 
+    getAlive() {
+        const alive = new Map(
+            [...this.users]
+                .filter(([k, v]) => v.alive)
+        );
+        return [...alive];
+    }
+
     getUser(id) {
         return this.users.get(id);
     }

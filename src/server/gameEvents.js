@@ -1,3 +1,5 @@
+let replay = require('./replay');
+
 exports = module.exports = function (io, serverRooms) {
     io.sockets.on('connection', function (socket) {
         console.log(`ID ${socket.id} connected!`);
@@ -36,7 +38,7 @@ exports = module.exports = function (io, serverRooms) {
                     x: user.x,
                     y: user.y
                 };
-                if(room.hasBomb(userPos)) return;
+                if (room.hasBomb(userPos)) return;
                 room.placeBomb(userPos);
                 io.to(roomID).emit('placeBomb', userPos);
                 setTimeout(() => {
@@ -64,36 +66,44 @@ exports = module.exports = function (io, serverRooms) {
         });
 
         socket.on('disconnect', () => {
-            let roomID = serverRooms.playerRooms.get(socket.id);
-            if (roomID === undefined) return;
-            let room = serverRooms.rooms.get(roomID);
-            if (room === undefined) return;
-            room.leave(socket.id);
-            if (room.users.size === 0) {
-                serverRooms.removeRoom(roomID);
-            } else if (room.users.size === 1) {
-                disconnectUsers(socket, roomID, [room.users.keys().next().value], "Win");
-            }
-            serverRooms.playerRooms.delete(socket.id);
-            socket.to(roomID).emit("disconnectUser", socket.id);
-            socket.leave(roomID);
-            console.log(`ID ${socket.id} disconnected!`);
+            if (serverRooms.playerRooms.get(socket.id) !== null)
+                markAsDead(serverRooms.playerRooms.get(socket.id), [socket.id]);
         });
 
-        function checkUsers(socket, roomID, deadUsers) {
+        function markAsDead(roomID, deadPlayers) {
             let room = serverRooms.rooms.get(roomID);
-            if (room.users.size === deadUsers.length) {
-                disconnectUsers(socket, roomID, deadUsers, "Draw");
-            } else {
-                disconnectUsers(socket, roomID, deadUsers, "Lose");
+            if (room !== null) {
+                console.log("markAsDead " + deadPlayers);
+                for (let i = 0; i < deadPlayers.length; i++) {
+                    io.to(roomID).emit('disconnectUser', deadPlayers[i]);
+                    // TODO FIX CRASH
+                    if (room === undefined) return;
+                    room.users.get(deadPlayers[i]).alive = false;
+                }
+                if (room.getAlive().length <= 1) { // everyone is dead or some won
+                    endGame(roomID);
+                }
+
+                console.log("Players: " + room.users.size);
+                console.log("Alive Players: " + room.getAlive().length);
+
             }
         }
 
-        function disconnectUsers(socket, roomID, users, result) {
-            for (let i = 0; i < users.length; i++) {
-                io.to(users[i]).emit('endGame', result);
-                if (serverRooms.rooms.get(roomID) !== undefined)
-                    serverRooms.rooms.get(roomID).leave(users[i]);
+        function endGame(roomID) {
+            let room = serverRooms.rooms.get(roomID);
+            if (room !== undefined) {
+                if (room.getAlive().length === 1) {
+                    console.log(JSON.stringify(room.getAlive()[0][0]));
+                    io.to(room.getAlive()[0][0]).emit('endGame', "Win");
+                    io.to(roomID).emit('endGame', "Lose");
+                }
+                io.to(roomID).emit('endGame', "Draw");
+                replay.save({
+                    'replay': room.gameRecorder.export(),
+                    'players': room.getUsers()
+                });
+                serverRooms.removeRoom(roomID);
             }
         }
 
@@ -102,7 +112,7 @@ exports = module.exports = function (io, serverRooms) {
                 io.to(roomID).emit('explode', pos);
                 let deadPlayers = serverRooms.rooms.get(roomID).detonate(pos).getKilledPlayers();
                 if (deadPlayers.length > 0) {
-                    checkUsers(socket, roomID, deadPlayers);
+                    markAsDead(roomID, deadPlayers);
                 }
             }
         }

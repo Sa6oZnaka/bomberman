@@ -2,13 +2,16 @@ import {RoomEnum} from "../enums/RoomEnum.js";
 import {socket} from "./Game.js";
 import {replayData} from "../../assets/replay.js";
 
+const http = new XMLHttpRequest();
 let room = null;
+let username = null;
 
 export class MainMenu extends Phaser.Scene {
 
     constructor() {
         super({key: "MainMenu"});
         this.text = "";
+        this.userText = "";
     }
 
     init(){
@@ -16,7 +19,8 @@ export class MainMenu extends Phaser.Scene {
     }
 
     create() {
-        this.text = this.add.text(10, 10, '', { fill: '#00ff00' });
+        this.text = this.add.text(10, 200, '', { fill: '#00ff00' });
+        this.userText = this.add.text(10, 10, '', { fill: '#00ff00' });
         this.graphics = this.add.graphics();
 
         this.add.text(20, 40, 'Button 1 - Casual, Button 2 - Competitive', {
@@ -26,8 +30,7 @@ export class MainMenu extends Phaser.Scene {
             fill : '#ffffff'
         });
 
-        let userName = document.getElementById('username').value;
-        this.add.text(0, 0, 'Logged in as: ' + userName, { fontFamily: '"Roboto Condensed"' });
+        this.getUser();
 
         this.buttonCasual = this.add.sprite(100, 100, "button", 1)
             .setInteractive()
@@ -62,6 +65,9 @@ export class MainMenu extends Phaser.Scene {
         if(room !== null){
             this.scene.start("Game", {room: room});
         }
+        this.userText.setText([
+            'Username: ' + username
+        ]);
     }
 
     searchGame(type, username){
@@ -74,6 +80,21 @@ export class MainMenu extends Phaser.Scene {
         ]);
     }
 
+    getUser(){
+        http.open('GET', '/getUser', true);
+        http.send();
+
+        http.onreadystatechange = processRequest;
+
+        let response;
+        function processRequest(e) {
+            if (http.readyState === 4 && http.status === 200) {
+                response = JSON.parse(http.responseText);
+                console.log(response);
+                username = response;
+            }
+        }
+    }
 }
 
 socket.on('foundGame', function (roomID) {

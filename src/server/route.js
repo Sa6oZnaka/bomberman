@@ -1,5 +1,3 @@
-let mysql = require('mysql');
-
 module.exports = function(app, passport) {
 
     app.get('/login', function(req, res) {
@@ -40,9 +38,11 @@ module.exports = function(app, passport) {
     }));
 
     app.get('/', isLoggedIn, function(req, res) {
-        res.render('index.ejs', {
-            user: req.user
-        });
+        res.render('index.ejs', null);
+    });
+
+    app.get('/getUser', isLoggedIn, function(req, res) {
+        res.send(JSON.stringify(req.user.username));
     });
 
     app.get('/logout', function(req, res) {
