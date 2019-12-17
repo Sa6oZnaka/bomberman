@@ -36,7 +36,7 @@ export class MainMenu extends Phaser.Scene {
             .setInteractive()
             .on('pointerdown', () => {
                 this.buttonCasual.setTexture('button', 0);
-                this.searchGame(RoomEnum.CASUAL);
+                this.searchGame(RoomEnum.CASUAL, username);
             } )
             .on('pointerover', () => this.buttonCasual.setTexture('button', 2) )
             .on('pointerout', () => this.buttonCasual.setTexture('button', 1) );
@@ -90,7 +90,6 @@ export class MainMenu extends Phaser.Scene {
         function processRequest(e) {
             if (http.readyState === 4 && http.status === 200) {
                 response = JSON.parse(http.responseText);
-                console.log(response);
                 username = response;
             }
         }

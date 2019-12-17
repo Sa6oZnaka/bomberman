@@ -20,7 +20,7 @@ export class Room {
     }
 
     beginRecording() {
-        console.log("Started!");
+        //console.log("Started!");
         if (this.gameRecorder === null)
             this.gameRecorder = new GameRecorder(this.getMap(), this.getUsers());
     }

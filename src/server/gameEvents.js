@@ -73,20 +73,16 @@ exports = module.exports = function (io, serverRooms) {
         function markAsDead(roomID, deadPlayers) {
             let room = serverRooms.rooms.get(roomID);
             if (room !== null) {
-                console.log("markAsDead " + deadPlayers);
                 for (let i = 0; i < deadPlayers.length; i++) {
                     io.to(roomID).emit('disconnectUser', deadPlayers[i]);
-                    // TODO FIX CRASH
                     if (room === undefined) return;
                     room.users.get(deadPlayers[i]).alive = false;
                 }
                 if (room.getAlive().length <= 1) { // everyone is dead or some won
                     endGame(roomID);
                 }
-
-                console.log("Players: " + room.users.size);
-                console.log("Alive Players: " + room.getAlive().length);
-
+                //console.log("Players: " + room.users.size);
+                //console.log("Alive Players: " + room.getAlive().length);
             }
         }
 
@@ -99,6 +95,7 @@ exports = module.exports = function (io, serverRooms) {
                     io.to(roomID).emit('endGame', "Lose");
                 }
                 io.to(roomID).emit('endGame', "Draw");
+                if(room.gameRecorder === null) return; // Don't saver if the game was canceled
                 replay.save({
                     'replay': room.gameRecorder.export(),
                     'players': room.getUsers()
