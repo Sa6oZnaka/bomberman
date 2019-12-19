@@ -1,12 +1,16 @@
-module.exports = function(app, passport) {
+let mysql = require('mysql');
+let dbconfig = require('../../config/dbconfig');
+let connection = mysql.createConnection(dbconfig);
 
-    app.get('/login', function(req, res) {
+module.exports = function (app, passport) {
+
+    app.get('/login', function (req, res) {
         res.render('login.ejs', {
             message: req.flash('loginMessage')
         });
     });
 
-    app.use(function(req, res, next) {
+    app.use(function (req, res, next) {
         res.set('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
         next();
     });
@@ -16,7 +20,7 @@ module.exports = function(app, passport) {
             failureRedirect: '/login',
             failureFlash: true
         }),
-        function(req, res) {
+        function (req, res) {
             if (req.body.remember) {
                 req.session.cookie.maxAge = 1000 * 60 * 3;
             } else {
@@ -25,7 +29,7 @@ module.exports = function(app, passport) {
             res.redirect('/');
         });
 
-    app.get('/register', function(req, res) {
+    app.get('/register', function (req, res) {
         res.render('register.ejs', {
             message: req.flash('registerMessage')
         });
@@ -37,16 +41,30 @@ module.exports = function(app, passport) {
         failureFlash: true
     }));
 
-    app.get('/', isLoggedIn, function(req, res) {
+    app.get('/', isLoggedIn, function (req, res) {
         res.render('index.ejs', null);
     });
 
-    app.get('/getUser', isLoggedIn, function(req, res) {
+    app.get('/getUser', isLoggedIn, function (req, res) {
         res.send(JSON.stringify(req.user.username));
     });
 
-    app.get('/logout', function(req, res) {
-        req.session.destroy(function(err) {
+    app.get('/getUserReplays', isLoggedIn, function (req, res) {
+        let sql =
+            `SELECT f.id, f.replay_date, f.winner 
+            FROM users p
+            INNER JOIN user_replay pf
+            ON pf.user_id = ? AND p.id = ?
+            INNER JOIN replays f
+            ON f.id = pf.replay_id`;
+        connection.query(sql, [req.user.id, req.user.id], function (error, result) {
+            if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
+            res.send(JSON.stringify(result));
+        });
+    });
+
+    app.get('/logout', function (req, res) {
+        req.session.destroy(function (err) {
             res.redirect('/login');
         });
     })

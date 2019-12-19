@@ -1,6 +1,5 @@
 import {RoomEnum} from "../enums/RoomEnum.js";
 import {socket} from "./Game.js";
-import {replayData} from "../../assets/replay.js";
 
 const http = new XMLHttpRequest();
 let room = null;
@@ -54,7 +53,7 @@ export class MainMenu extends Phaser.Scene {
             .setInteractive()
             .on('pointerdown', () => {
                 this.buttonReplay.setTexture('button', 0);
-                this.scene.start("Replay", replayData);
+                this.scene.start("UserReplays", this.userText.text);
             } )
             .on('pointerover', () => this.buttonReplay.setTexture('button', 2) )
             .on('pointerout', () => this.buttonReplay.setTexture('button', 1) );
@@ -66,7 +65,7 @@ export class MainMenu extends Phaser.Scene {
             this.scene.start("Game", {room: room});
         }
         this.userText.setText([
-            'Username: ' + username
+            username
         ]);
     }
 
@@ -83,9 +82,7 @@ export class MainMenu extends Phaser.Scene {
     getUser(){
         http.open('GET', '/getUser', true);
         http.send();
-
         http.onreadystatechange = processRequest;
-
         let response;
         function processRequest(e) {
             if (http.readyState === 4 && http.status === 200) {
