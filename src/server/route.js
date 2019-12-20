@@ -52,12 +52,10 @@ module.exports = function (app, passport) {
     app.get('/getUserReplays', isLoggedIn, function (req, res) {
         let sql =
             `SELECT f.* 
-            FROM users p
-            INNER JOIN user_replay pf
-            ON pf.user_id = ? AND p.id = ?
+            FROM user_replay pf
             INNER JOIN replays f
-            ON f.id = pf.replay_id`;
-        connection.query(sql, [req.user.id, req.user.id], function (error, result) {
+            ON f.id = pf.replay_id AND pf.user_id = ?`;
+        connection.query(sql, [req.user.id], function (error, result) {
             if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
             res.send(JSON.stringify(result));
         });
