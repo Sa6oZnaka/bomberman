@@ -9,13 +9,14 @@ export class Replay extends Phaser.Scene {
     }
 
     init(data) {
+        let replayData = JSON.parse(data);
         this.gameMap = new GameMap();
-        this.gameMap.map = data.map;
-        this.actions = data.actions;
-        this.startTime = data.startTime;
+        this.gameMap.map = replayData.map;
+        this.actions = replayData.actions;
+        this.startTime = replayData.startTime;
         this.users = new Map();
 
-        let u2 = new Map(JSON.parse(data.users));
+        let u2 = new Map(JSON.parse(replayData.users));
         for (let [key, value] of u2.entries()) {
             this.users.set(key, new User(value.username, value.x, value.y, 40));
         }

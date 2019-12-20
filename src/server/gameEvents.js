@@ -89,16 +89,18 @@ exports = module.exports = function (io, serverRooms) {
         function endGame(roomID) {
             let room = serverRooms.rooms.get(roomID);
             if (room !== undefined) {
+                if(room.gameRecorder === null) return; // Don't saver if the game was canceled
+                let winner = null;
                 if (room.getAlive().length === 1) {
-                    console.log(JSON.stringify(room.getAlive()[0][0]));
+                    winner = room.getAlive()[0][1].username;
                     io.to(room.getAlive()[0][0]).emit('endGame', "Win");
                     io.to(roomID).emit('endGame', "Lose");
                 }
                 io.to(roomID).emit('endGame', "Draw");
-                if(room.gameRecorder === null) return; // Don't saver if the game was canceled
                 replay.save({
                     'replay': room.gameRecorder.export(),
-                    'players': room.getUsers()
+                    'players': room.getUsers(),
+                    'winner' : winner
                 });
                 serverRooms.removeRoom(roomID);
             }

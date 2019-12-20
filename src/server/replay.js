@@ -1,5 +1,3 @@
-import {User} from "../api/User";
-
 let mysql = require('mysql');
 let databaseConfig = require('../../config/dbconfig');
 let connection = mysql.createConnection(databaseConfig);
@@ -12,16 +10,16 @@ module.exports = {
         let sql = `INSERT INTO REPLAYS (
         jsonData,
         winner,
-        replay_date) VALUES (?, ?, ?)`;
+        replay_date) VALUES (?, ?, NOW())`;
         let data = [
             req.replay,
-            "0",
-            new Date()
+            req.winner,
         ];
         connection.query(sql, data, function (error, result) {
             if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
             let replayId = result.insertId;
             for (let [key, value] of new Map(JSON.parse(req.players)).entries()) {
+                if(value.username === undefined || replayId === undefined) return console.error("\x1b[33m FAILED TO GET USER DATA!!! \x1b[0m");
                 connection.query(`select id From Users where username = ?`, [value.username], (error, result) => {
                     if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
                     let sql2 = `INSERT INTO USER_REPLAY (user_id, replay_id) 

@@ -1,4 +1,4 @@
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
+#ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';
 Drop database if exists bomberman;
 create database bomberman CHARSET 'utf8';
 use bomberman;
@@ -12,8 +12,8 @@ Create table Users(
 Create table Replays(
 	id INT primary key auto_increment,
     jsonData JSON NOT NULL,
-    winner varchar(50) NOT NULL,
-    replay_date date NOT NULL
+    winner varchar(50),
+    replay_date DATETIME NOT NULL
 );
 
 Create table User_replay(

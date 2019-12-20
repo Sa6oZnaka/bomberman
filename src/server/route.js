@@ -51,7 +51,7 @@ module.exports = function (app, passport) {
 
     app.get('/getUserReplays', isLoggedIn, function (req, res) {
         let sql =
-            `SELECT f.id, f.replay_date, f.winner 
+            `SELECT f.* 
             FROM users p
             INNER JOIN user_replay pf
             ON pf.user_id = ? AND p.id = ?
