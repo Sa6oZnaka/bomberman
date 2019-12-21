@@ -98,7 +98,7 @@ exports = module.exports = function (io, serverRooms) {
                 for (let i = 0; i < deadPlayers.length; i++) {
                     io.to(roomID).emit('disconnectUser', deadPlayers[i]);
                     if (room === undefined) return;
-                    room.users.get(deadPlayers[i]).alive = false;
+                    room.markAsDead(deadPlayers[i]);
                 }
                 if (room.getAlive().length <= 1) { // everyone is dead or some won
                     endGame(roomID);

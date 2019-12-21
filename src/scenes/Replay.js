@@ -27,6 +27,11 @@ export class Replay extends Phaser.Scene {
         this.lastActionID = 0;
         this.date = new Date();
         this.timeDiff = this.date.getTime() - this.startTime;
+        this.add.sprite(40, 20, 'backButton')
+            .setInteractive()
+            .on('pointerdown', (pointer) => {
+                this.scene.start("MainMenu");
+            })
     }
 
     update() {
@@ -42,6 +47,9 @@ export class Replay extends Phaser.Scene {
                         if (this.gameMap.hasBomb(action.data.point.x, action.data.point.y))
                             this.gameMap.detonate(action.data.point.x, action.data.point.y);
                     }, 1000);
+                    break;
+                case ActionEnum.KILLED:
+                    this.users.delete(action.data.id);
                     break;
                 default:
                     console.warn("Action not found!");
