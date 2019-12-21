@@ -32,7 +32,6 @@ app.set('view engine', 'ejs')
 let serverRooms = new ServerRooms();
 require('./passport')(passport);
 require('./gameEvents')(io, serverRooms);
-require('./menuEvents')(io, serverRooms);
 require('./route')(app, passport);
 
 let port = process.env.PORT || config.SERVER_PORT;

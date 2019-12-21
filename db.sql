@@ -13,7 +13,7 @@ Create table Replays(
 	id INT primary key auto_increment,
     jsonData JSON NOT NULL,
     winner varchar(50),
-    replay_date date NOT NULL
+    replay_date DATETIME NOT NULL
 );
 
 Create table User_replay(

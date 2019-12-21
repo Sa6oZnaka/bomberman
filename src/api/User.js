@@ -6,7 +6,7 @@ export class User {
         this.y = y;
         this.size = size;
         this.inTransit = false;
-
+        this.alive = true;
         this.transitionX = 0;
         this.transitionY = 0;
     }
