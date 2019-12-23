@@ -52,8 +52,8 @@ module.exports = function (app, passport) {
     app.get('/getUserReplays', isLoggedIn, function (req, res) {
         let sql =
             `SELECT f.* 
-            FROM user_replay pf
-            INNER JOIN replays f
+            FROM User_replay pf
+            INNER JOIN Replays f
             ON f.id = pf.replay_id AND pf.user_id = ?`;
         connection.query(sql, [req.user.id], function (error, result) {
             if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");

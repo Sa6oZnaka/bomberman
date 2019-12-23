@@ -7,7 +7,7 @@ connection.query('USE ' + databaseConfig.database);
 module.exports = {
 
     save: function (req, res, next) {
-        let sql = `INSERT INTO REPLAYS (
+        let sql = `INSERT INTO Replays (
         jsonData,
         winner,
         replay_date) VALUES (?, ?, NOW())`;
@@ -22,7 +22,7 @@ module.exports = {
                 if(value.username === undefined || replayId === undefined) return console.error("\x1b[33m FAILED TO GET USER DATA!!! \x1b[0m");
                 connection.query(`select id From Users where username = ?`, [value.username], (error, result) => {
                     if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
-                    let sql2 = `INSERT INTO USER_REPLAY (user_id, replay_id) 
+                    let sql2 = `INSERT INTO User_replay (user_id, replay_id) 
                                 VALUES (?, ?);`;
                     let data2 = [
                         result[0].id,
@@ -35,9 +35,5 @@ module.exports = {
             }
         });
     },
-
-    load: function (req, res, next) {
-        console.log("load");
-    }
 
 };
