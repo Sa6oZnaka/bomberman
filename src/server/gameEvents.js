@@ -1,6 +1,6 @@
 let replay = require('./replay');
 
-exports = module.exports = function (io, serverRooms) {
+exports = module.exports = function (io, serverRooms, connection) {
     io.sockets.on('connection', function (socket) {
         console.log(`ID ${socket.id} connected!`);
 
@@ -117,7 +117,7 @@ exports = module.exports = function (io, serverRooms) {
                     io.to(roomID).emit('endGame', "Lose");
                 }
                 io.to(roomID).emit('endGame', "Draw");
-                replay.save({
+                replay.save(connection, {
                     'replay': room.gameRecorder.export(),
                     'players': room.getUsers(),
                     'winner' : winner

@@ -1,8 +1,6 @@
-let mysql = require('mysql');
-let dbconfig = require('../../config/dbconfig');
-let connection = mysql.createConnection(dbconfig);
 
-module.exports = function (app, passport) {
+
+module.exports = function (app, passport, connection) {
 
     app.get('/login', function (req, res) {
         res.render('login.ejs', {

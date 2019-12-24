@@ -1,12 +1,7 @@
-let mysql = require('mysql');
-let databaseConfig = require('../../config/dbconfig');
-let connection = mysql.createConnection(databaseConfig);
-
-connection.query('USE ' + databaseConfig.database);
 
 module.exports = {
 
-    save: function (req, res, next) {
+    save: function (connection, req, res, next) {
         let sql = `INSERT INTO Replays (
         jsonData,
         winner,

@@ -10,7 +10,8 @@ let express = require('express')
     , cookieParser = require('cookie-parser')
     , io = require('socket.io')(http)
     , passport = require('passport')
-    , flash = require('connect-flash');
+    , flash = require('connect-flash')
+    , connection = require('./dbInit');
 
 app.set('view engine', 'ejs')
     .use(cookieParser())
@@ -30,9 +31,9 @@ app.set('view engine', 'ejs')
     .use(express.static('public'));
 
 let serverRooms = new ServerRooms();
-require('./passport')(passport);
-require('./gameEvents')(io, serverRooms);
-require('./route')(app, passport);
+require('./passport')(passport, connection);
+require('./gameEvents')(io, serverRooms, connection);
+require('./route')(app, passport, connection);
 
 let port = process.env.PORT || config.SERVER_PORT;
 http.listen(port, () => {
