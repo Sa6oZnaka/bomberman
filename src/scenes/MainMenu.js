@@ -44,7 +44,7 @@ export class MainMenu extends Phaser.Scene {
             .setInteractive()
             .on('pointerdown', () => {
                 this.buttonCompetitive.setTexture('button', 0);
-                this.searchGame(RoomEnum.COMPETITIVE);
+                this.searchGame(RoomEnum.COMPETITIVE, username);
             } )
             .on('pointerover', () => this.buttonCompetitive.setTexture('button', 2) )
             .on('pointerout', () => this.buttonCompetitive.setTexture('button', 1) );
@@ -70,6 +70,7 @@ export class MainMenu extends Phaser.Scene {
     }
 
     searchGame(type, username){
+        console.log(username);
         socket.connect().emit('findGame', {
             type: type,
             username: username
@@ -83,11 +84,11 @@ export class MainMenu extends Phaser.Scene {
         http.open('GET', '/getUser', true);
         http.send();
         http.onreadystatechange = processRequest;
-        let response;
         function processRequest(e) {
             if (http.readyState === 4 && http.status === 200) {
-                response = JSON.parse(http.responseText);
-                username = response;
+                let data = JSON.parse(http.responseText);
+                console.log(data);
+                username = data.user;
             }
         }
     }

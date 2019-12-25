@@ -1,6 +1,5 @@
-let LocalStrategy = require("passport-local").Strategy;
-
-let bcrypt = require('bcrypt-nodejs');
+let LocalStrategy = require("passport-local").Strategy,
+    bcrypt = require('bcrypt-nodejs');
 
 module.exports = function (passport, connection) {
     passport.serializeUser(function (user, done) {

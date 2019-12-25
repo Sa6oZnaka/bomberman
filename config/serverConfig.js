@@ -1,0 +1,7 @@
+module.exports = {
+    RANK_POINTS_ON_LOSE : -1,
+    RANK_POINTS_ON_WIN  : 1,
+    LEVEL_POINTS_ON_LOSE : 200,
+    LEVEL_POINTS_ON_WIN  : 500,
+    SERVER_PORT: 3000,
+};

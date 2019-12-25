@@ -1,0 +1,17 @@
+export const RankEnum = Object.freeze({
+    BRONZE_1: 0,
+    BRONZE_2: 1,
+    BRONZE_3: 2,
+    BRONZE_4: 3,
+    BRONZE_ELITE: 4,
+    SILVER_1: 5,
+    SILVER_2: 6,
+    SILVER_3: 7,
+    SILVER_ELITE: 8,
+    GOLD_1: 9,
+    GOLD_2: 10,
+    GOLD_ELITE: 11,
+    LEGENDARY_BOMBER_1: 12,
+    LEGENDARY_ELITE: 13,
+    BOMBER_ELITE: 14,
+});

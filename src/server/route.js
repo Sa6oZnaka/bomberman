@@ -44,7 +44,12 @@ module.exports = function (app, passport, connection) {
     });
 
     app.get('/getUser', isLoggedIn, function (req, res) {
-        res.send(JSON.stringify(req.user.username));
+        res.send(JSON.stringify({
+            user: req.user.username,
+            level: req.user.level_points,
+            rank: req.user.rank_points,
+            wins: req.user.wins,
+        }));
     });
 
     app.get('/getUserReplays', isLoggedIn, function (req, res) {

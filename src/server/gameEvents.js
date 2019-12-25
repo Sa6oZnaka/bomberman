@@ -1,5 +1,3 @@
-let replay = require('./replay');
-
 exports = module.exports = function (io, serverRooms, connection) {
     io.sockets.on('connection', function (socket) {
         console.log(`ID ${socket.id} connected!`);
@@ -109,7 +107,7 @@ exports = module.exports = function (io, serverRooms, connection) {
         function endGame(roomID) {
             let room = serverRooms.rooms.get(roomID);
             if (room !== undefined) {
-                if(room.gameRecorder === null) return; // Don't saver if the game was canceled
+                if (room.gameRecorder === null) return; // Don't saver if the game was canceled
                 let winner = null;
                 if (room.getAlive().length === 1) {
                     winner = room.getAlive()[0][1].username;
@@ -117,11 +115,16 @@ exports = module.exports = function (io, serverRooms, connection) {
                     io.to(roomID).emit('endGame', "Lose");
                 }
                 io.to(roomID).emit('endGame', "Draw");
-                replay.save(connection, {
+                require('./saveReplay')(connection, {
                     'replay': room.gameRecorder.export(),
                     'players': room.getUsers(),
-                    'winner' : winner
+                    'winner': winner
                 });
+                if (winner !== null)
+                    require('./updateUsersStats')(connection, {
+                        'players': room.getUsers(),
+                        'winner' : winner
+                    });
                 serverRooms.removeRoom(roomID);
             }
         }

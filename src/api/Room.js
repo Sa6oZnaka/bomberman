@@ -1,4 +1,4 @@
-import {config} from "../../config/config.js";
+import {gameConfig} from "../../config/gameConfig.js";
 import {User} from "./User.js";
 import {FieldEnum} from "../enums/FieldEnum.js";
 import {Point} from "./Point.js";
@@ -87,14 +87,14 @@ export class Room {
     createNewUser(username) {
         let pos = this.getNewPlayerPosition();
         this.gameMap.clearForPlayer(pos.x, pos.y);
-        return new User(username, pos.x, pos.y, config.GRID_CELL_SIZE);
+        return new User(username, pos.x, pos.y, gameConfig.GRID_CELL_SIZE);
     }
 
     getNewPlayerPosition() {
         let minX = 1,
             minY = 1;
-        let maxX = config.MAP_SIZE_X - 2,
-            maxY = config.MAP_SIZE_Y - 2;
+        let maxX = gameConfig.MAP_SIZE_X - 2,
+            maxY = gameConfig.MAP_SIZE_Y - 2;
         if (this.users.size === 0)
             return new Point(minX, minY);
         if (this.users.size === 1)
