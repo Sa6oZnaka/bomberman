@@ -1,9 +1,9 @@
 import {RoomEnum} from "../enums/RoomEnum.js";
 import {socket} from "./Game.js";
+import {UserStats} from "../api/UserStats.js";
 
 const http = new XMLHttpRequest();
 let room = null;
-let username = null;
 
 export class MainMenu extends Phaser.Scene {
 
@@ -14,7 +14,9 @@ export class MainMenu extends Phaser.Scene {
     }
 
     init(){
+        this.username = null;
         room = null;
+        this.userStats = null;
     }
 
     create() {
@@ -35,7 +37,7 @@ export class MainMenu extends Phaser.Scene {
             .setInteractive()
             .on('pointerdown', () => {
                 this.buttonCasual.setTexture('button', 0);
-                this.searchGame(RoomEnum.CASUAL, username);
+                this.searchGame(RoomEnum.CASUAL, this.username);
             } )
             .on('pointerover', () => this.buttonCasual.setTexture('button', 2) )
             .on('pointerout', () => this.buttonCasual.setTexture('button', 1) );
@@ -44,7 +46,7 @@ export class MainMenu extends Phaser.Scene {
             .setInteractive()
             .on('pointerdown', () => {
                 this.buttonCompetitive.setTexture('button', 0);
-                this.searchGame(RoomEnum.COMPETITIVE, username);
+                this.searchGame(RoomEnum.COMPETITIVE, this.username);
             } )
             .on('pointerover', () => this.buttonCompetitive.setTexture('button', 2) )
             .on('pointerout', () => this.buttonCompetitive.setTexture('button', 1) );
@@ -53,10 +55,11 @@ export class MainMenu extends Phaser.Scene {
             .setInteractive()
             .on('pointerdown', () => {
                 this.buttonReplay.setTexture('button', 0);
-                this.scene.start("UserReplays", this.userText.text);
+                this.scene.start("UserReplays", this.username);
             } )
             .on('pointerover', () => this.buttonReplay.setTexture('button', 2) )
             .on('pointerout', () => this.buttonReplay.setTexture('button', 1) );
+
 
     }
 
@@ -64,13 +67,10 @@ export class MainMenu extends Phaser.Scene {
         if(room !== null){
             this.scene.start("Game", {room: room});
         }
-        this.userText.setText([
-            username
-        ]);
     }
 
     searchGame(type, username){
-        console.log(username);
+        if(username === null) return;
         socket.connect().emit('findGame', {
             type: type,
             username: username
@@ -83,15 +83,20 @@ export class MainMenu extends Phaser.Scene {
     getUser(){
         http.open('GET', '/getUser', true);
         http.send();
-        http.onreadystatechange = processRequest;
-        function processRequest(e) {
+        http.onreadystatechange = () => {
             if (http.readyState === 4 && http.status === 200) {
                 let data = JSON.parse(http.responseText);
                 console.log(data);
-                username = data.user;
+                this.username = data.user;
+
+                this.userStats = new UserStats(data.level, data.rank, data.wins);
+                this.add.text(0, 0, 'Username : ' + this.username + ', Wins: ' + data.wins + ', Rank: ' + this.userStats.getRank(), { fontFamily: '"Roboto Condensed"' });
+                this.add.sprite(400, 300, "ranks", this.userStats.getRankId());
+                this.add.text(0, 20, 'Level : ' + this.userStats.getLevel() + ' Next level : ' + this.userStats.getNextLevelProgress() + '%', { fontFamily: '"Roboto Condensed"' });
             }
-        }
+        };
     }
+
 }
 
 socket.on('foundGame', function (roomID) {

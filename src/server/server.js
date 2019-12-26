@@ -24,11 +24,12 @@ app.set('view engine', 'ejs')
         saveUninitialized: true
     }))
     .use('/src', express.static('src'))
+    .use('/config', express.static('config'))
     .use('/assets', express.static('assets'))
     .use(passport.initialize())
     .use(passport.session())
     .use(flash())
-    .use(express.static('public'));
+    .use(express.static('src'));
 
 let serverRooms = new ServerRooms();
 require('./passport')(passport, connection);
