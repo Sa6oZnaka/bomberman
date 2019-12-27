@@ -120,9 +120,10 @@ export class Room {
             this.users.delete(id);
     }
 
-    markAsDead(id){
+    markAsDead(id) {
         this.users.get(id).alive = false;
-        this.gameRecorder.addAction(ActionEnum.KILLED, {id: id});
+        if (this.gameRecorder !== null)
+            this.gameRecorder.addAction(ActionEnum.KILLED, {id: id});
     }
 
     possibleMovement(id, pos) {

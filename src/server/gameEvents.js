@@ -107,24 +107,25 @@ exports = module.exports = function (io, serverRooms, connection) {
         function endGame(roomID) {
             let room = serverRooms.rooms.get(roomID);
             if (room !== undefined) {
-                if (room.gameRecorder === null) return; // Don't saver if the game was canceled
-                let winner = null;
-                if (room.getAlive().length === 1) {
-                    winner = room.getAlive()[0][1].username;
-                    io.to(room.getAlive()[0][0]).emit('endGame', "Win");
-                    io.to(roomID).emit('endGame', "Lose");
-                }
-                io.to(roomID).emit('endGame', "Draw");
-                require('./saveReplay')(connection, {
-                    'replay': room.gameRecorder.export(),
-                    'players': room.getUsers(),
-                    'winner': winner
-                });
-                if (winner !== null)
-                    require('./updateUsersStats')(connection, {
+                if (room.gameRecorder !== null) {
+                    let winner = null;
+                    if (room.getAlive().length === 1) {
+                        winner = room.getAlive()[0][1].username;
+                        io.to(room.getAlive()[0][0]).emit('endGame', "Win");
+                        io.to(roomID).emit('endGame', "Lose");
+                    }
+                    io.to(roomID).emit('endGame', "Draw");
+                    require('./saveReplay')(connection, {
+                        'replay': room.gameRecorder.export(),
                         'players': room.getUsers(),
-                        'winner' : winner
+                        'winner': winner
                     });
+                    if (winner !== null)
+                        require('./updateUsersStats')(connection, {
+                            'players': room.getUsers(),
+                            'winner': winner
+                        });
+                }
                 serverRooms.removeRoom(roomID);
             }
         }

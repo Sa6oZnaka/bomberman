@@ -23,17 +23,15 @@ export class MainMenu extends Phaser.Scene {
         this.text = this.add.text(10, 200, '', { fill: '#00ff00' });
         this.userText = this.add.text(10, 10, '', { fill: '#00ff00' });
         this.graphics = this.add.graphics();
-
-        this.add.text(20, 40, 'Button 1 - Casual, Button 2 - Competitive', {
-            fill : '#ffffff'
-        });
-        this.add.text(20, 240, 'Button 3 - Replay', {
-            fill : '#ffffff'
-        });
-
+        this.graphics.fillStyle(0x0000FF, 1.0);
+        this.graphics.fillRect(0, 660, this.scale.width - 350, this.scale.height);
+        this.graphics.fillStyle(0x00FFFF, 1.0);
+        this.graphics.fillRect(this.scale.width - 350, 150, this.scale.width, this.scale.height);
+        this.graphics.fillStyle(0x000FFF, 1.0);
+        this.graphics.fillRect(this.scale.width - 350, 0, this.scale.width, 150);
         this.getUser();
 
-        this.buttonCasual = this.add.sprite(100, 100, "button", 1)
+        this.buttonCasual = this.add.sprite(100, 720, "button", 1)
             .setInteractive()
             .on('pointerdown', () => {
                 this.buttonCasual.setTexture('button', 0);
@@ -42,7 +40,7 @@ export class MainMenu extends Phaser.Scene {
             .on('pointerover', () => this.buttonCasual.setTexture('button', 2) )
             .on('pointerout', () => this.buttonCasual.setTexture('button', 1) );
 
-        this.buttonCompetitive = this.add.sprite(300, 100, "button", 1)
+        this.buttonCompetitive = this.add.sprite(300, 720, "button", 1)
             .setInteractive()
             .on('pointerdown', () => {
                 this.buttonCompetitive.setTexture('button', 0);
@@ -51,7 +49,7 @@ export class MainMenu extends Phaser.Scene {
             .on('pointerover', () => this.buttonCompetitive.setTexture('button', 2) )
             .on('pointerout', () => this.buttonCompetitive.setTexture('button', 1) );
 
-        this.buttonReplay = this.add.sprite(100, 300, "button", 1)
+        this.buttonReplay = this.add.sprite(700, 720, "button", 1)
             .setInteractive()
             .on('pointerdown', () => {
                 this.buttonReplay.setTexture('button', 0);
@@ -59,8 +57,9 @@ export class MainMenu extends Phaser.Scene {
             } )
             .on('pointerover', () => this.buttonReplay.setTexture('button', 2) )
             .on('pointerout', () => this.buttonReplay.setTexture('button', 1) );
-
-
+        this.add.text(50, 710, 'Play Casual', { fontFamily: '"Roboto Condensed"' });
+        this.add.text(240, 710, 'Play Competitive', { fontFamily: '"Roboto Condensed"' });
+        this.add.text(670, 710, 'Replays', { fontFamily: '"Roboto Condensed"' });
     }
 
     update() {
@@ -75,9 +74,9 @@ export class MainMenu extends Phaser.Scene {
             type: type,
             username: username
         });
-        this.text.setText([
-            'Searching for games...'
-        ]);
+        this.add.text(20, 20, 'Searching for games...', {
+            fill : '#ffffff'
+        });
     }
 
     getUser(){
@@ -90,9 +89,10 @@ export class MainMenu extends Phaser.Scene {
                 this.username = data.user;
 
                 this.userStats = new UserStats(data.level, data.rank, data.wins);
-                this.add.text(0, 0, 'Username : ' + this.username + ', Wins: ' + data.wins + ', Rank: ' + this.userStats.getRank(), { fontFamily: '"Roboto Condensed"' });
-                this.add.sprite(400, 300, "ranks", this.userStats.getRankId());
-                this.add.text(0, 20, 'Level : ' + this.userStats.getLevel() + ' Next level : ' + this.userStats.getNextLevelProgress() + '%', { fontFamily: '"Roboto Condensed"' });
+                this.add.text(820, 6, 'Username : ' + this.username + ', Wins: ' + data.wins, { fontFamily: '"Roboto Condensed"' });
+                this.add.text(820, 124, 'Rank: ' + this.userStats.getRank(), { fontFamily: '"Roboto Condensed"' });
+                this.add.sprite(870, 100, "ranks", this.userStats.getRankId()).setScale(0.5);
+                this.add.text(820, 50, 'Level : ' + this.userStats.getLevel() + ' Next level : ' + this.userStats.getNextLevelProgress() + '%', { fontFamily: '"Roboto Condensed"' });
             }
         };
     }
