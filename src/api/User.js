@@ -1,7 +1,8 @@
 export class User {
 
-    constructor(username, x, y, size) {
+    constructor(username, x, y, size, rank) {
         this.username = username;
+        this.rank = rank;
         this.x = x;
         this.y = y;
         this.size = size;

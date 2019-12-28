@@ -14,7 +14,7 @@ let replaysTable = (`Create table if not exists Replays(
     id INT primary key auto_increment,
     jsonData JSON NOT NULL,
     winner varchar(50),
-    replay_date date NOT NULL
+    replay_date datetime NOT NULL
 );`);
 let userReplaysTable = (`Create table if not exists User_replay(
     user_id INT NOT NULL,

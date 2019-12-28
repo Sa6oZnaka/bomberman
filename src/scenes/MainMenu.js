@@ -15,6 +15,7 @@ export class MainMenu extends Phaser.Scene {
 
     init(){
         this.username = null;
+        this.rank = null;
         room = null;
         this.userStats = null;
     }
@@ -44,7 +45,7 @@ export class MainMenu extends Phaser.Scene {
             .setInteractive()
             .on('pointerdown', () => {
                 this.buttonCompetitive.setTexture('button', 0);
-                this.searchGame(RoomEnum.COMPETITIVE, this.username);
+                this.searchGame(RoomEnum.COMPETITIVE, this.username, this.rank);
             } )
             .on('pointerover', () => this.buttonCompetitive.setTexture('button', 2) )
             .on('pointerout', () => this.buttonCompetitive.setTexture('button', 1) );
@@ -68,10 +69,12 @@ export class MainMenu extends Phaser.Scene {
         }
     }
 
-    searchGame(type, username){
+    searchGame(type, username, rank){
+        console.warn(rank);
         if(username === null) return;
         socket.connect().emit('findGame', {
             type: type,
+            rank: rank,
             username: username
         });
         this.add.text(20, 20, 'Searching for games...', {
@@ -87,12 +90,19 @@ export class MainMenu extends Phaser.Scene {
                 let data = JSON.parse(http.responseText);
                 console.log(data);
                 this.username = data.user;
+                this.rank = data.rank;
 
-                this.userStats = new UserStats(data.level, data.rank, data.wins);
-                this.add.text(820, 6, 'Username : ' + this.username + ', Wins: ' + data.wins, { fontFamily: '"Roboto Condensed"' });
+                this.userStats = new UserStats(data.level, this.rank, data.wins);
+                this.add.text(820, 6, 'Username : ' + this.username, { fontFamily: '"Roboto Condensed"' });
+                this.add.text(820, 26,  'Wins: ' + data.wins, { fontFamily: '"Roboto Condensed"' });
+                this.graphics.fillStyle(0x4f4f4f, 1.0);
+                this.graphics.fillRect(820, 50, 300, 20);
+                this.graphics.fillStyle(0x0, 1.0);
+                this.graphics.fillRect(820, 50, this.userStats.getNextLevelProgress() * 300, 20);
+                this.add.text(820, 50, 'Level : ' + this.userStats.getLevel(), { fontFamily: '"Roboto Condensed"' });
                 this.add.text(820, 124, 'Rank: ' + this.userStats.getRank(), { fontFamily: '"Roboto Condensed"' });
                 this.add.sprite(870, 100, "ranks", this.userStats.getRankId()).setScale(0.5);
-                this.add.text(820, 50, 'Level : ' + this.userStats.getLevel() + ' Next level : ' + this.userStats.getNextLevelProgress() + '%', { fontFamily: '"Roboto Condensed"' });
+
             }
         };
     }

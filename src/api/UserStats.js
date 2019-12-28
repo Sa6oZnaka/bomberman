@@ -21,8 +21,8 @@ export class UserStats {
         return Math.floor(this.levelPoints / gameConfig.REQUIRED_POINTS_FOR_NEXT_LEVEL);
     }
 
-    getNextLevelProgress(){ // % to next level
-        return gameConfig.REQUIRED_POINTS_FOR_NEXT_LEVEL / (this.levelPoints - (this.getLevel() * gameConfig.REQUIRED_POINTS_FOR_NEXT_LEVEL));
+    getNextLevelProgress() { // % to next level
+        return (this.levelPoints - (this.getLevel() * gameConfig.REQUIRED_POINTS_FOR_NEXT_LEVEL)) / gameConfig.REQUIRED_POINTS_FOR_NEXT_LEVEL;
     }
 
 }

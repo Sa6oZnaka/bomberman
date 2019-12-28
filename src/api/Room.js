@@ -7,7 +7,7 @@ import {ActionEnum} from "../enums/ActionEnum";
 
 export class Room {
 
-    constructor(type, gameMap, userLimit, required, joinAfterStart) {
+    constructor(type, gameMap, userLimit, required, joinAfterStart, hasMatchMaking) {
         this.type = type;
         this.gameMap = gameMap;
         this.users = new Map();
@@ -17,6 +17,7 @@ export class Room {
         this.userLimit = userLimit; // max players that can join
         this.required = required; // required to start a game
         this.dontAllowJoin = false;
+        this.hasMatchMaking = hasMatchMaking;
     }
 
     beginRecording() {
@@ -84,10 +85,10 @@ export class Room {
         return !this.dontAllowJoin && (this.users.size < this.userLimit || this.userLimit === 0);
     }
 
-    createNewUser(username) {
+    createNewUser(username, rank) {
         let pos = this.getNewPlayerPosition();
         this.gameMap.clearForPlayer(pos.x, pos.y);
-        return new User(username, pos.x, pos.y, gameConfig.GRID_CELL_SIZE);
+        return new User(username, pos.x, pos.y, gameConfig.GRID_CELL_SIZE, rank);
     }
 
     getNewPlayerPosition() {
@@ -104,12 +105,12 @@ export class Room {
             Math.floor(Math.random() * (maxY - minY) / 2) * 2 + minY);
     }
 
-    connect(id, username) {
+    connect(id, username, rank) {
         if (this.users.has(id)) {
             return false;
         }
         if (this.canBeJoined()) {
-            this.users.set(id, this.createNewUser(username));
+            this.users.set(id, this.createNewUser(username, rank));
             return true
         }
         return false;
@@ -124,6 +125,14 @@ export class Room {
         this.users.get(id).alive = false;
         if (this.gameRecorder !== null)
             this.gameRecorder.addAction(ActionEnum.KILLED, {id: id});
+    }
+
+    getAverageRank(){
+        let rankPoints = 0;
+        for (let [id, user] of this.users.entries()) {
+            rankPoints += user.rank;
+        }
+        return rankPoints / this.users.size;
     }
 
     possibleMovement(id, pos) {

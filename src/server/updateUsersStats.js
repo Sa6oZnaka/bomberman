@@ -13,7 +13,7 @@ module.exports = function (connection, req) {
         connection.query(`
                 UPDATE Users 
                 SET 
-                rank_points = IF(rank_points + ? >= 0 AND rank_points + ? <= ?, rank_points + ?, rank_points),
+                rank_points = IF(rank_points + ? >= 0 AND rank_points + ? < ?, rank_points + ?, rank_points),
                 level_points = level_points + ?,
                 wins = IF (username = ?, wins + 1, wins)
                 WHERE

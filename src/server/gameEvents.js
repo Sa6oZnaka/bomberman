@@ -71,12 +71,12 @@ exports = module.exports = function (io, serverRooms, connection) {
 
         socket.on('findGame', (data) => {
             if (!serverRooms.playerRooms.has(socket.id))
-                findGame(data.type, data.username);
+                findGame(data.type, data.username, data.rank);
         });
 
-        function findGame(type, username) {
-            let roomID = serverRooms.getBestRoom(type);
-            if (serverRooms.rooms.get(roomID).connect(socket.id, username)) {
+        function findGame(type, username, rank) {
+            let roomID = serverRooms.getBestRoom(type, rank);
+            if (serverRooms.rooms.get(roomID).connect(socket.id, username, rank)) {
                 socket.join(roomID);
                 serverRooms.playerRooms.set(socket.id, roomID);
                 let room = serverRooms.rooms.get(roomID);
@@ -86,7 +86,7 @@ exports = module.exports = function (io, serverRooms, connection) {
                     io.to(roomID).emit('foundGame', roomID);
                 }
             } else {
-                findGame(type, username);
+                findGame(type, username, rank);
             }
         }
 
@@ -109,22 +109,26 @@ exports = module.exports = function (io, serverRooms, connection) {
             if (room !== undefined) {
                 if (room.gameRecorder !== null) {
                     let winner = null;
+                    let roomRank = room.getAverageRank();
                     if (room.getAlive().length === 1) {
                         winner = room.getAlive()[0][1].username;
                         io.to(room.getAlive()[0][0]).emit('endGame', "Win");
                         io.to(roomID).emit('endGame', "Lose");
                     }
                     io.to(roomID).emit('endGame', "Draw");
-                    require('./saveReplay')(connection, {
-                        'replay': room.gameRecorder.export(),
-                        'players': room.getUsers(),
-                        'winner': winner
-                    });
-                    if (winner !== null)
-                        require('./updateUsersStats')(connection, {
+                    if (room.hasMatchMaking) {
+                        require('./saveReplay')(connection, {
+                            'replay': room.gameRecorder.export(),
                             'players': room.getUsers(),
                             'winner': winner
                         });
+                        if (winner !== null)
+                            require('./updateUsersStats')(connection, {
+                                'players': room.getUsers(),
+                                'winner': winner,
+                                'rank' : roomRank
+                            });
+                    }
                 }
                 serverRooms.removeRoom(roomID);
             }
