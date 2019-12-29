@@ -1,11 +1,13 @@
+import {gameConfig} from "../../config/gameConfig.js";
+
 export class User {
 
-    constructor(username, x, y, size, rank) {
+    constructor(username, x, y, rank) {
         this.username = username;
         this.rank = rank;
         this.x = x;
         this.y = y;
-        this.size = size;
+        this.size = gameConfig.GRID_CELL_SIZE;
         this.inTransit = false;
         this.alive = true;
         this.transitionX = 0;

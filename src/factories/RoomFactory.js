@@ -2,11 +2,12 @@ import {Room} from "../api/Room.js";
 import {RoomEnum} from "../enums/RoomEnum.js";
 import {GameMap} from "../api/GameMap";
 import {gameConfig} from "../../config/gameConfig";
+import {CompetitiveRoom} from "../api/CompetitiveRoom";
 
 export class RoomFactory {
 
     static competitive(){
-        return new Room(RoomEnum.COMPETITIVE, new GameMap(gameConfig.MAP_SIZE_X, gameConfig.MAP_SIZE_Y), 2, 2, false, true);
+        return new CompetitiveRoom(RoomEnum.COMPETITIVE, new GameMap(gameConfig.MAP_SIZE_X, gameConfig.MAP_SIZE_Y), 2, 2, false, true);
     }
 
     static casual(){

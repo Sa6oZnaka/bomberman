@@ -19,7 +19,8 @@ exports = module.exports = function (io, serverRooms, connection) {
                         'map': room.getMap(),
                         'users': room.getUsers(),
                     });
-                    room.beginRecording();
+                    if (room.hasMatchMaking)
+                        room.beginRecording();
                     if (!room.joinAfterStart)
                         room.dontAllowJoin = true;
                 }
@@ -109,7 +110,6 @@ exports = module.exports = function (io, serverRooms, connection) {
             if (room !== undefined) {
                 if (room.gameRecorder !== null) {
                     let winner = null;
-                    let roomRank = room.getAverageRank();
                     if (room.getAlive().length === 1) {
                         winner = room.getAlive()[0][1].username;
                         io.to(room.getAlive()[0][0]).emit('endGame', "Win");
@@ -117,6 +117,7 @@ exports = module.exports = function (io, serverRooms, connection) {
                     }
                     io.to(roomID).emit('endGame', "Draw");
                     if (room.hasMatchMaking) {
+                        let roomRank = room.getAverageRank();
                         require('./saveReplay')(connection, {
                             'replay': room.gameRecorder.export(),
                             'players': room.getUsers(),
@@ -126,7 +127,7 @@ exports = module.exports = function (io, serverRooms, connection) {
                             require('./updateUsersStats')(connection, {
                                 'players': room.getUsers(),
                                 'winner': winner,
-                                'rank' : roomRank
+                                'rank': roomRank
                             });
                     }
                 }

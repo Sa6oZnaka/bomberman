@@ -1,6 +1,5 @@
 import {RoomFactory} from "../factories/RoomFactory.js";
 import {gameConfig} from "../../config/gameConfig.js";
-import {RoomEnum} from "../enums/RoomEnum";
 
 export class ServerRooms {
 
@@ -37,11 +36,16 @@ export class ServerRooms {
         for (let [key, room] of this.rooms.entries()) {
             if (room.type === type && room.canBeJoined()) {
                 if (room.users.size > roomPlayers) {
-                    let rankGap = Math.abs(room.getAverageRank() - rank);
-                    if (!room.hasMatchMaking || rankGap <= gameConfig.MAX_RANK_POINTS_GAP && roomRank > rankGap) {
+                    if (!room.hasMatchMaking){
                         roomID = key;
                         roomPlayers = room.users.size;
-                        roomRank = rankGap;
+                    }else{
+                        let rankGap = Math.abs(room.getAverageRank() - rank);
+                        if (rankGap <= gameConfig.MAX_RANK_POINTS_GAP && roomRank > rankGap) {
+                            roomID = key;
+                            roomPlayers = room.users.size;
+                            roomRank = rankGap;
+                        }
                     }
                 }
             }

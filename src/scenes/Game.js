@@ -79,7 +79,7 @@ socket.on('spawn', function (data) {
     gameMap.map = data.map;
     let u2 = new Map(JSON.parse(data.users));
     for (let [key, value] of u2.entries()) {
-        users.set(key, new User(value.username, value.x, value.y, 40));
+        users.set(key, new User(value.username, value.x, value.y, null));
     }
     user = users.get(socket.id);
     spawned = true;
@@ -107,7 +107,7 @@ socket.on('explode', function (pos) {
 
 socket.on('newUser', function (data) {
     if (!spawned) return;
-    users.set(data.id, new User(data.username,data.user.x, data.user.y, 40));
+    users.set(data.id, new User(data.username,data.user.x, data.user.y, null));
     gameMap.clearForPlayer(data.user.x, data.user.y);
 });
 
