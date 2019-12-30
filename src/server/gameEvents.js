@@ -1,3 +1,5 @@
+import {RoomEnum} from "../enums/RoomEnum";
+
 exports = module.exports = function (io, serverRooms, connection) {
     io.sockets.on('connection', function (socket) {
         console.log(`ID ${socket.id} connected!`);
@@ -100,37 +102,44 @@ exports = module.exports = function (io, serverRooms, connection) {
                     room.markAsDead(deadPlayers[i]);
                 }
                 if (room.getAlive().length <= 1) { // everyone is dead or some won
-                    endGame(roomID);
+                    endGame(roomID, deadPlayers);
                 }
             }
         }
 
-        function endGame(roomID) {
+        function endGame(roomID, lastAlive) {
             let room = serverRooms.rooms.get(roomID);
             if (room !== undefined) {
-                if (room.gameRecorder !== null) {
-                    let winner = null;
-                    if (room.getAlive().length === 1) {
-                        winner = room.getAlive()[0][1].username;
-                        io.to(room.getAlive()[0][0]).emit('endGame', "Win");
-                        io.to(roomID).emit('endGame', "Lose");
-                    }
-                    io.to(roomID).emit('endGame', "Draw");
-                    if (room.hasMatchMaking) {
-                        let roomRank = room.getAverageRank();
-                        require('./saveReplay')(connection, {
-                            'replay': room.gameRecorder.export(),
-                            'players': room.getUsers(),
-                            'winner': winner
-                        });
-                        if (winner !== null)
-                            require('./updateUsersStats')(connection, {
-                                'players': room.getUsers(),
-                                'winner': winner,
-                                'rank': roomRank
-                            });
+                if(room.type === RoomEnum.COMPETITIVE && room.gameRecorder === null) return; // user left before the game started
+                let winner = null;
+                if (room.getAlive().length === 1) {
+                    winner = room.getAlive()[0][1].username;
+                    io.to(room.getAlive()[0][0]).emit('endGame', "Win");
+                }
+                if (lastAlive.length > 1) {
+                    for (let i = 0; i < lastAlive.length; i++) {
+                        io.to(lastAlive[i]).emit('endGame', "Draw");
                     }
                 }
+                io.to(roomID).emit('endGame', "Lose");
+                require('./updateUsersLevel')(connection, {
+                    'players': room.getUsers(),
+                    'winner': winner
+                });
+                if (room.hasMatchMaking) {
+                    let roomRank = room.getAverageRank();
+                    require('./saveReplay')(connection, {
+                        'replay': room.gameRecorder.export(),
+                        'players': room.getUsers(),
+                        'winner': winner
+                    });
+                    require('./updateUsersRank')(connection, {
+                        'players': room.getUsers(),
+                        'winner': winner,
+                        'rank': roomRank
+                    });
+                }
+
                 serverRooms.removeRoom(roomID);
             }
         }

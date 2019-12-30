@@ -70,7 +70,6 @@ export class MainMenu extends Phaser.Scene {
     }
 
     searchGame(type, username, rank){
-        console.warn(rank);
         if(username === null) return;
         socket.connect().emit('findGame', {
             type: type,
@@ -88,7 +87,7 @@ export class MainMenu extends Phaser.Scene {
         http.onreadystatechange = () => {
             if (http.readyState === 4 && http.status === 200) {
                 let data = JSON.parse(http.responseText);
-                console.log(data);
+                //console.log(data);
                 this.username = data.user;
                 this.rank = data.rank;
 

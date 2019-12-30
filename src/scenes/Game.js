@@ -18,7 +18,7 @@ export class Game extends Phaser.Scene {
         super({key: "Game"});
     }
 
-    init(data){
+    init(data) {
         this.room = data.room;
     }
 
@@ -52,8 +52,11 @@ export class Game extends Phaser.Scene {
             if (keys.get('Space').isDown) this.placeBomb();
         }
 
-        for (const user of users.values()) {
-            user.draw(this.graphics);
+        for (const enemyUser of users.values()) {
+            if (user !== enemyUser)
+                enemyUser.draw(this.graphics, true);
+            else
+                enemyUser.draw(this.graphics, false);
         }
         if (endGame) this.endGame(result);
     }
@@ -107,7 +110,7 @@ socket.on('explode', function (pos) {
 
 socket.on('newUser', function (data) {
     if (!spawned) return;
-    users.set(data.id, new User(data.username,data.user.x, data.user.y, null));
+    users.set(data.id, new User(data.username, data.user.x, data.user.y, null));
     gameMap.clearForPlayer(data.user.x, data.user.y);
 });
 
