@@ -1,13 +1,7 @@
-let LocalStrategy = require("passport-local").Strategy;
+let LocalStrategy = require("passport-local").Strategy,
+    bcrypt = require('bcrypt-nodejs');
 
-let mysql = require('mysql');
-let bcrypt = require('bcrypt-nodejs');
-let dbconfig = require('../../config/dbconfig');
-let connection = mysql.createConnection(dbconfig);
-
-connection.query('USE ' + dbconfig.database);
-
-module.exports = function (passport) {
+module.exports = function (passport, connection) {
     passport.serializeUser(function (user, done) {
         done(null, user.id);
     });
@@ -43,8 +37,9 @@ module.exports = function (passport) {
 
                             connection.query(insertQuery, [newUserMysql.username, newUserMysql.password],
                                 function (err, rows) {
+                                    if(err)
                                     console.log(err);
-                                    console.log(rows.insertId);
+                                    //console.log(rows.insertId);
                                     newUserMysql.id = rows.insertId;
 
                                     return done(null, newUserMysql);

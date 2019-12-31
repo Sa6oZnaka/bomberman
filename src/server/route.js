@@ -1,8 +1,6 @@
-let mysql = require('mysql');
-let dbconfig = require('../../config/dbconfig');
-let connection = mysql.createConnection(dbconfig);
 
-module.exports = function (app, passport) {
+
+module.exports = function (app, passport, connection) {
 
     app.get('/login', function (req, res) {
         res.render('login.ejs', {
@@ -46,7 +44,12 @@ module.exports = function (app, passport) {
     });
 
     app.get('/getUser', isLoggedIn, function (req, res) {
-        res.send(JSON.stringify(req.user.username));
+        res.send(JSON.stringify({
+            user: req.user.username,
+            level: req.user.level_points,
+            rank: req.user.rank_points,
+            wins: req.user.wins,
+        }));
     });
 
     app.get('/getUserReplays', isLoggedIn, function (req, res) {

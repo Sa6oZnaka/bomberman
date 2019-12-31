@@ -50,12 +50,9 @@ export class UserReplays extends Phaser.Scene {
     getUserReplays() {
         http.open('GET', '/getUserReplays', true);
         http.send();
-        http.onreadystatechange = processRequest;
-        let t = this;
-
-        function processRequest(e) {
+        http.onreadystatechange = () => {
             if (http.readyState === 4 && http.status === 200) {
-                t.drawMenu(JSON.parse(http.responseText));
+                this.drawMenu(JSON.parse(http.responseText));
             }
         }
     }

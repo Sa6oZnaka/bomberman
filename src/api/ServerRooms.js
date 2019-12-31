@@ -1,4 +1,5 @@
 import {RoomFactory} from "../factories/RoomFactory.js";
+import {gameConfig} from "../../config/gameConfig.js";
 
 export class ServerRooms {
 
@@ -20,7 +21,7 @@ export class ServerRooms {
         return this.lastRoomID;
     }
 
-    removeRoom(roomID){
+    removeRoom(roomID) {
         this.rooms.delete(roomID);
     }
 
@@ -28,14 +29,24 @@ export class ServerRooms {
         this.rooms.delete(roomID);
     }
 
-    getBestRoom(type) {
+    getBestRoom(type, rank) {
         let roomID,
-            roomPlayers = -1;
+            roomPlayers = -1,
+            roomRank = gameConfig.MAX_RANK_POINTS_GAP + 1;
         for (let [key, room] of this.rooms.entries()) {
             if (room.type === type && room.canBeJoined()) {
                 if (room.users.size > roomPlayers) {
-                    roomID = key;
-                    roomPlayers = room.users.size;
+                    if (!room.hasMatchMaking){
+                        roomID = key;
+                        roomPlayers = room.users.size;
+                    }else{
+                        let rankGap = Math.abs(room.getAverageRank() - rank);
+                        if (rankGap <= gameConfig.MAX_RANK_POINTS_GAP && roomRank > rankGap) {
+                            roomID = key;
+                            roomPlayers = room.users.size;
+                            roomRank = rankGap;
+                        }
+                    }
                 }
             }
         }

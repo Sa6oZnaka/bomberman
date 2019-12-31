@@ -1,4 +1,3 @@
-import {config} from "../../config/config";
 import {ServerRooms} from "../api/ServerRooms";
 
 let express = require('express')
@@ -10,7 +9,9 @@ let express = require('express')
     , cookieParser = require('cookie-parser')
     , io = require('socket.io')(http)
     , passport = require('passport')
-    , flash = require('connect-flash');
+    , flash = require('connect-flash')
+    , connection = require('./dbInit')
+    , serverConfig = require('../../config/serverConfig');
 
 app.set('view engine', 'ejs')
     .use(cookieParser())
@@ -23,18 +24,19 @@ app.set('view engine', 'ejs')
         saveUninitialized: true
     }))
     .use('/src', express.static('src'))
+    .use('/config', express.static('config'))
     .use('/assets', express.static('assets'))
     .use(passport.initialize())
     .use(passport.session())
     .use(flash())
-    .use(express.static('public'));
+    .use(express.static('src'));
 
 let serverRooms = new ServerRooms();
-require('./passport')(passport);
-require('./gameEvents')(io, serverRooms);
-require('./route')(app, passport);
+require('./passport')(passport, connection);
+require('./gameEvents')(io, serverRooms, connection);
+require('./route')(app, passport, connection);
 
-let port = process.env.PORT || config.SERVER_PORT;
+let port = process.env.PORT || serverConfig.SERVER_PORT;
 http.listen(port, () => {
     console.log("listening on port " + port);
 });

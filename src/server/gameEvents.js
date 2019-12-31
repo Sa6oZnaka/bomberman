@@ -1,6 +1,6 @@
-let replay = require('./replay');
+import {RoomEnum} from "../enums/RoomEnum";
 
-exports = module.exports = function (io, serverRooms) {
+exports = module.exports = function (io, serverRooms, connection) {
     io.sockets.on('connection', function (socket) {
         console.log(`ID ${socket.id} connected!`);
 
@@ -21,7 +21,8 @@ exports = module.exports = function (io, serverRooms) {
                         'map': room.getMap(),
                         'users': room.getUsers(),
                     });
-                    room.beginRecording();
+                    if (room.hasMatchMaking)
+                        room.beginRecording();
                     if (!room.joinAfterStart)
                         room.dontAllowJoin = true;
                 }
@@ -73,12 +74,12 @@ exports = module.exports = function (io, serverRooms) {
 
         socket.on('findGame', (data) => {
             if (!serverRooms.playerRooms.has(socket.id))
-                findGame(data.type, data.username);
+                findGame(data.type, data.username, data.rank);
         });
 
-        function findGame(type, username) {
-            let roomID = serverRooms.getBestRoom(type);
-            if (serverRooms.rooms.get(roomID).connect(socket.id, username)) {
+        function findGame(type, username, rank) {
+            let roomID = serverRooms.getBestRoom(type, rank);
+            if (serverRooms.rooms.get(roomID).connect(socket.id, username, rank)) {
                 socket.join(roomID);
                 serverRooms.playerRooms.set(socket.id, roomID);
                 let room = serverRooms.rooms.get(roomID);
@@ -88,7 +89,7 @@ exports = module.exports = function (io, serverRooms) {
                     io.to(roomID).emit('foundGame', roomID);
                 }
             } else {
-                findGame(type, username);
+                findGame(type, username, rank);
             }
         }
 
@@ -101,27 +102,44 @@ exports = module.exports = function (io, serverRooms) {
                     room.markAsDead(deadPlayers[i]);
                 }
                 if (room.getAlive().length <= 1) { // everyone is dead or some won
-                    endGame(roomID);
+                    endGame(roomID, deadPlayers);
                 }
             }
         }
 
-        function endGame(roomID) {
+        function endGame(roomID, lastAlive) {
             let room = serverRooms.rooms.get(roomID);
             if (room !== undefined) {
-                if(room.gameRecorder === null) return; // Don't saver if the game was canceled
+                if(room.type === RoomEnum.COMPETITIVE && room.gameRecorder === null) return; // user left before the game started
                 let winner = null;
                 if (room.getAlive().length === 1) {
                     winner = room.getAlive()[0][1].username;
                     io.to(room.getAlive()[0][0]).emit('endGame', "Win");
-                    io.to(roomID).emit('endGame', "Lose");
                 }
-                io.to(roomID).emit('endGame', "Draw");
-                replay.save({
-                    'replay': room.gameRecorder.export(),
+                if (lastAlive.length > 1) {
+                    for (let i = 0; i < lastAlive.length; i++) {
+                        io.to(lastAlive[i]).emit('endGame', "Draw");
+                    }
+                }
+                io.to(roomID).emit('endGame', "Lose");
+                require('./updateUsersLevel')(connection, {
                     'players': room.getUsers(),
-                    'winner' : winner
+                    'winner': winner
                 });
+                if (room.hasMatchMaking) {
+                    let roomRank = room.getAverageRank();
+                    require('./saveReplay')(connection, {
+                        'replay': room.gameRecorder.export(),
+                        'players': room.getUsers(),
+                        'winner': winner
+                    });
+                    require('./updateUsersRank')(connection, {
+                        'players': room.getUsers(),
+                        'winner': winner,
+                        'rank': roomRank
+                    });
+                }
+
                 serverRooms.removeRoom(roomID);
             }
         }
