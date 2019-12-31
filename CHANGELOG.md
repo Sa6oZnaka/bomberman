@@ -1,6 +1,6 @@
 #Change log
 
-## 00.02.00 - Dec. 30, 2019
+## 00.02.00 - Dec. 31, 2019
 
 **Added:**
 - Ranking System
