@@ -64,6 +64,18 @@ module.exports = function (app, passport, connection) {
         });
     });
 
+    app.get('/getLeaderBoard', isLoggedIn, function (req, res) {
+        let sql =
+            `SELECT username, rank_points FROM Users
+            ORDER BY rank_points DESC
+            LIMIT 10;`;
+        connection.query(sql, function (error, result) {
+            if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
+            res.send(JSON.stringify(result));
+        });
+    });
+
+
     app.get('/logout', function (req, res) {
         req.session.destroy(function (err) {
             res.redirect('/login');

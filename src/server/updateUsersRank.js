@@ -31,6 +31,7 @@ module.exports = function (connection, req) {
     }
 
     function rewardOnWin(userPoints, avgRank) {
+        if(avgRank < 1) return 1;
         let rankReward = avgRank / userPoints;
         if (rankReward > serverConfig.MAX_RANK_POINTS_ON_WIN)
             return serverConfig.MAX_RANK_POINTS_ON_WIN;
