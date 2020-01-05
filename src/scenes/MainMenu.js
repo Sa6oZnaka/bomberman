@@ -16,22 +16,23 @@ export class MainMenu extends Phaser.Scene {
         this.username = null;
         this.rank = null;
         room = null;
-        this.userStats = null;
     }
 
     create() {
+        this.seperatorX = this.scale.width - 350;
+        this.seperatorY1 = 150;
+        this.seperatorY2 = 680;
+
+        this.getUser();
         this.text = this.add.text(10, 200, '', {fill: '#00ff00'});
-        this.userText = this.add.text(10, 10, '', {fill: '#00ff00'});
         this.graphics = this.add.graphics();
         this.graphics.fillStyle(0x0000FF, 1.0);
-        this.graphics.fillRect(0, 660, this.scale.width - 350, this.scale.height);
+        this.graphics.fillRect(0, this.seperatorY2, this.seperatorX, this.scale.height);
         this.graphics.fillStyle(0x00FFFF, 1.0);
-        this.graphics.fillRect(this.scale.width - 350, 150, this.scale.width, this.scale.height);
+        this.graphics.fillRect(this.seperatorX, this.seperatorY1, this.scale.width, this.scale.height);
         this.graphics.fillStyle(0x000FFF, 1.0);
-        this.graphics.fillRect(this.scale.width - 350, 0, this.scale.width, 150);
-        this.getUser();
-
-        this.buttonCasual = this.add.sprite(100, 720, "button", 1)
+        this.graphics.fillRect(this.seperatorX, 0, this.scale.width, 150);
+        this.buttonCasual = this.add.sprite(100, this.seperatorY2 + 40, "button", 1)
             .setInteractive()
             .on('pointerdown', () => {
                 this.buttonCasual.setTexture('button', 0);
@@ -39,8 +40,7 @@ export class MainMenu extends Phaser.Scene {
             })
             .on('pointerover', () => this.buttonCasual.setTexture('button', 2))
             .on('pointerout', () => this.buttonCasual.setTexture('button', 1));
-
-        this.buttonCompetitive = this.add.sprite(300, 720, "button", 1)
+        this.buttonCompetitive = this.add.sprite(300, this.seperatorY2 + 40, "button", 1)
             .setInteractive()
             .on('pointerdown', () => {
                 this.buttonCompetitive.setTexture('button', 0);
@@ -48,8 +48,7 @@ export class MainMenu extends Phaser.Scene {
             })
             .on('pointerover', () => this.buttonCompetitive.setTexture('button', 2))
             .on('pointerout', () => this.buttonCompetitive.setTexture('button', 1));
-
-        this.buttonReplay = this.add.sprite(700, 720, "button", 1)
+        this.buttonReplay = this.add.sprite(this.seperatorX - 100, this.seperatorY2 + 40, "button", 1)
             .setInteractive()
             .on('pointerdown', () => {
                 this.buttonReplay.setTexture('button', 0);
@@ -57,9 +56,9 @@ export class MainMenu extends Phaser.Scene {
             })
             .on('pointerover', () => this.buttonReplay.setTexture('button', 2))
             .on('pointerout', () => this.buttonReplay.setTexture('button', 1));
-        this.add.text(50, 710, 'Play Casual', {fontFamily: '"Roboto Condensed"'});
-        this.add.text(240, 710, 'Play Competitive', {fontFamily: '"Roboto Condensed"'});
-        this.add.text(670, 710, 'Replays', {fontFamily: '"Roboto Condensed"'});
+        this.add.text(50, this.seperatorY2 + 30, 'Play Casual', {fontFamily: '"Roboto Condensed"'});
+        this.add.text(240, this.seperatorY2 + 30, 'Play Competitive', {fontFamily: '"Roboto Condensed"'});
+        this.add.text(this.seperatorX - 130, this.seperatorY2 + 30, 'Replays', {fontFamily: '"Roboto Condensed"'});
     }
 
     update() {
@@ -80,30 +79,6 @@ export class MainMenu extends Phaser.Scene {
         });
     }
 
-    getLeaderBoard() {
-        http.open('GET', '/getLeaderBoard', true);
-        http.send();
-        http.onreadystatechange = () => {
-            if (http.readyState === 4 && http.status === 200) {
-                let data = JSON.parse(http.responseText);
-                //console.log(data);
-                let sizeY = 50;
-                for (let i = 0; i < data.length; i++) {
-                    if (data[i].username === this.username) {
-                        this.graphics.fillStyle(0xFF6347, 1.0);
-                        this.graphics.fillRect(12, 151 + i * sizeY, 784, sizeY - 2);
-                    } else {
-                        this.graphics.fillStyle(0x4f4f4f, 1.0);
-                        this.graphics.fillRect(12, 151 + i * sizeY, 784, sizeY - 2);
-                    }
-                    this.add.text(18, 174 + i * sizeY, '#' + (i + 1), {fontFamily: '"Roboto Condensed"'});
-                    this.add.text(50, 174 + i * sizeY, 'Username : ' + data[i].username, {fontFamily: '"Roboto Condensed"'});
-                    this.add.sprite(740, 174 + i * sizeY, "ranks", Math.floor(data[i].rank_points / 5)).setScale(0.5);
-                }
-            }
-        }
-    }
-
     getUser() {
         http.open('GET', '/getUser', true);
         http.send();
@@ -114,19 +89,45 @@ export class MainMenu extends Phaser.Scene {
                 this.username = data.user;
                 this.rank = data.rank;
 
+                let margin = 10;
                 this.userStats = new UserStats(data.level, this.rank, data.wins);
-                this.add.text(820, 6, 'Username : ' + this.username, {fontFamily: '"Roboto Condensed"'});
-                this.add.text(820, 26, 'Wins: ' + data.wins, {fontFamily: '"Roboto Condensed"'});
+                this.add.text(this.seperatorX + margin, 6, 'Username : ' + this.username, {fontFamily: '"Roboto Condensed"'});
+                this.add.text(this.seperatorX + margin, 26, 'Wins: ' + data.wins, {fontFamily: '"Roboto Condensed"'});
                 this.graphics.fillStyle(0x4f4f4f, 1.0);
-                this.graphics.fillRect(820, 50, 300, 20);
+                this.graphics.fillRect(this.seperatorX + margin, 50, this.scale.width - this.seperatorX - margin * 2, 20);
                 this.graphics.fillStyle(0x0, 1.0);
-                this.graphics.fillRect(820, 50, this.userStats.getNextLevelProgress() * 300, 20);
-                this.add.text(820, 50, 'Level : ' + this.userStats.getLevel(), {fontFamily: '"Roboto Condensed"'});
-                this.add.text(820, 124, 'Rank: ' + this.userStats.getRank(), {fontFamily: '"Roboto Condensed"'});
-                this.add.sprite(870, 100, "ranks", this.userStats.getRankId()).setScale(0.5);
+                this.graphics.fillRect(this.seperatorX + margin, 50, this.userStats.getNextLevelProgress() * (this.scale.width - this.seperatorX - margin * 2), 20);
+                this.add.text(this.seperatorX + margin, 50, 'Level : ' + this.userStats.getLevel(), {fontFamily: '"Roboto Condensed"'});
+                this.add.sprite(this.seperatorX + margin + 50, 100, "ranks", this.userStats.getRankId()).setScale(0.5);
+                this.add.text(this.seperatorX + margin, 124, 'Rank: ' + this.userStats.getRank(), {fontFamily: '"Roboto Condensed"'});
                 this.getLeaderBoard();
             }
         };
+    }
+
+    getLeaderBoard() {
+        http.open('GET', '/getLeaderBoard', true);
+        http.send();
+        http.onreadystatechange = () => {
+            if (http.readyState === 4 && http.status === 200) {
+                let data = JSON.parse(http.responseText);
+                //console.log(data);
+                let gap = 12;
+                let sizeY = (this.seperatorY2 - gap - this.seperatorY1) / 10;
+
+                for (let i = 0; i < data.length; i++) {
+                    if (data[i].username === this.username)
+                        this.graphics.fillStyle(0xFF6347, 1.0);
+                    else
+                        this.graphics.fillStyle(0x4f4f4f, 1.0);
+                    this.graphics.fillRect(gap, 151 + i * sizeY, this.seperatorX - gap * 2, sizeY - 2);
+                    this.add.text(18, 174 + i * sizeY, '#' + (i + 1), {fontFamily: '"Roboto Condensed"'});
+                    this.add.text(50, 174 + i * sizeY, 'Username : ' + data[i].username, {fontFamily: '"Roboto Condensed"'});
+                    this.add.text(this.seperatorX - 170, 174 + i * sizeY, 'Rank : ', {fontFamily: '"Roboto Condensed"'});
+                    this.add.sprite(this.seperatorX - 65, 174 + i * sizeY, "ranks", Math.floor(data[i].rank_points / 5)).setScale(0.5);
+                }
+            }
+        }
     }
 
 }
