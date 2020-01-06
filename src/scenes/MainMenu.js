@@ -1,7 +1,7 @@
 import {RoomEnum} from "../enums/RoomEnum.js";
-import {socket} from "./Game.js";
 import {UserStats} from "../api/UserStats.js";
 
+export let socket = io();
 const http = new XMLHttpRequest();
 let room = null;
 
@@ -124,7 +124,7 @@ export class MainMenu extends Phaser.Scene {
                     this.add.text(18, 174 + i * sizeY, '#' + (i + 1), {fontFamily: '"Roboto Condensed"'});
                     this.add.text(50, 174 + i * sizeY, 'Username : ' + data[i].username, {fontFamily: '"Roboto Condensed"'});
                     this.add.text(this.seperatorX - 170, 174 + i * sizeY, 'Rank : ', {fontFamily: '"Roboto Condensed"'});
-                    this.add.sprite(this.seperatorX - 65, 174 + i * sizeY, "ranks", Math.floor(data[i].rank_points / 5)).setScale(0.5);
+                    this.add.sprite(this.seperatorX - 65, 174 + i * sizeY, "ranks", UserStats.getRankByPoints(data[i].rank_points)).setScale(0.5);
                 }
             }
         }

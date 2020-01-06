@@ -9,7 +9,8 @@ export class Replay extends Phaser.Scene {
     }
 
     init(data) {
-        let replayData = JSON.parse(data);
+        let replayData = JSON.parse(data.replayData);
+        this.username = data.username;
         this.gameMap = new GameMap();
         this.gameMap.map = replayData.map;
         this.actions = replayData.actions;
@@ -62,7 +63,10 @@ export class Replay extends Phaser.Scene {
         this.gameMap.draw(this.graphics);
 
         for (const user of this.users.values()) {
-            user.draw(this.graphics);
+            if (user.username === this.username)
+                user.draw(this.graphics, false);
+            else
+                user.draw(this.graphics, true);
         }
     }
 

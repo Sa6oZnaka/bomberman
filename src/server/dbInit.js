@@ -7,7 +7,7 @@ let userTable = (`Create table if not exists Users(
     username varchar(50) NOT NULL,
     password varchar(100) NOT NULL,
     wins INT UNSIGNED NOT NULL DEFAULT 0,
-    rank_points float UNSIGNED NOT NULL DEFAULT 0,
+    rank_points float UNSIGNED NOT NULL DEFAULT 1,
     level_points float UNSIGNED NOT NULL DEFAULT 0
 );`);
 let replaysTable = (`Create table if not exists Replays(

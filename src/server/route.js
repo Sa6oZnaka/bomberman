@@ -1,5 +1,3 @@
-
-
 module.exports = function (app, passport, connection) {
 
     app.get('/login', function (req, res) {
@@ -74,7 +72,6 @@ module.exports = function (app, passport, connection) {
             res.send(JSON.stringify(result));
         });
     });
-
 
     app.get('/logout', function (req, res) {
         req.session.destroy(function (err) {

@@ -1,4 +1,14 @@
-#Change log
+# Change log
+
+## 00.03.00 - Jan. 6, 2020 
+
+**Added:**
+- Leader board
+- Other players are now different color in replays
+
+**Bug fixes:**
+
+- Fixed now being able to gain rank points when user rank is 0
 
 ## 00.02.00 - Dec. 31, 2019
 
