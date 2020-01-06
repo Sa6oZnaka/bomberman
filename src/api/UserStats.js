@@ -25,4 +25,8 @@ export class UserStats {
         return (this.levelPoints - (this.getLevel() * gameConfig.REQUIRED_POINTS_FOR_NEXT_LEVEL)) / gameConfig.REQUIRED_POINTS_FOR_NEXT_LEVEL;
     }
 
+    static getRankByPoints(points){
+        return Math.floor(points / gameConfig.REQUIRED_POINTS_FOR_NEXT_RANK);
+    }
+
 }

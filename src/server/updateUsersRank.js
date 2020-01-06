@@ -14,7 +14,7 @@ module.exports = function (connection, req) {
         connection.query(`
                 UPDATE Users 
                 SET 
-                rank_points = IF(rank_points + ? >= 0 AND rank_points + ? < ?, rank_points + ?, rank_points),
+                rank_points = IF(rank_points + ? >= 1 AND rank_points + ? < ?, rank_points + ?, rank_points),
                 wins = IF (username = ?, wins + 1, wins)
                 WHERE
                 username = ?;
@@ -38,7 +38,6 @@ module.exports = function (connection, req) {
     }
 
     function rewardOnDraw(userPoints, avgRank) {
-        console.log("DRAW");
         if (userPoints < avgRank)
             return avgRank / userPoints;
         return -(userPoints / avgRank);

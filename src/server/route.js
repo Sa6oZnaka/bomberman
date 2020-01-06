@@ -1,5 +1,3 @@
-
-
 module.exports = function (app, passport, connection) {
 
     app.get('/login', function (req, res) {
@@ -59,6 +57,17 @@ module.exports = function (app, passport, connection) {
             INNER JOIN Replays f
             ON f.id = pf.replay_id AND pf.user_id = ?`;
         connection.query(sql, [req.user.id], function (error, result) {
+            if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
+            res.send(JSON.stringify(result));
+        });
+    });
+
+    app.get('/getLeaderBoard', isLoggedIn, function (req, res) {
+        let sql =
+            `SELECT username, rank_points FROM Users
+            ORDER BY rank_points DESC
+            LIMIT 10;`;
+        connection.query(sql, function (error, result) {
             if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
             res.send(JSON.stringify(result));
         });

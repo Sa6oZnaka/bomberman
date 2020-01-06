@@ -58,7 +58,10 @@ export class UserReplays extends Phaser.Scene {
     }
 
     startReplay(replayData) {
-        this.scene.start("Replay", replayData);
+        this.scene.start("Replay", {
+            replayData: replayData,
+            username: this.username
+        });
     }
 }
 
