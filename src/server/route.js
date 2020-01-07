@@ -73,6 +73,14 @@ module.exports = function (app, passport, connection) {
         });
     });
 
+    app.post('/addFriend', isLoggedIn, function (req, res) {
+        let temp = JSON.parse(req.body.data);
+        let sql = `insert into Relationships(user_id_a, user_id_b) values (?, ?);`;
+        connection.query(sql, [req.user.id, temp], function (error, result) {
+            if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
+        });
+    });
+
     app.get('/logout', function (req, res) {
         req.session.destroy(function (err) {
             res.redirect('/login');

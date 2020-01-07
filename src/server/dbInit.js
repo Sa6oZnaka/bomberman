@@ -22,6 +22,14 @@ let userReplaysTable = (`Create table if not exists User_replay(
     PRIMARY KEY(user_id, replay_id)
 );`);
 
+let relationshipsTable = (`Create table if not exists Relationships(
+    user_id_a INT NOT NULL,
+    user_id_b INT NOT NULL,
+    status char not null default 'P',
+    PRIMARY KEY(user_id_a, user_id_b)
+);`);
+// 'P' - pending, 'F' - friends, 'B' - blocked
+
 connection.query(`CREATE DATABASE IF NOT EXISTS ?? CHARSET \'utf8\'`, db, function (err) {
     if (err) throw err;
     connection.changeUser({
@@ -35,6 +43,9 @@ connection.query(`CREATE DATABASE IF NOT EXISTS ?? CHARSET \'utf8\'`, db, functi
             if (err) throw err;
         });
         connection.query(userReplaysTable, function (err) {
+            if (err) throw err;
+        });
+        connection.query(relationshipsTable, function (err) {
             if (err) throw err;
         });
     });

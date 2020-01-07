@@ -32,33 +32,39 @@ export class MainMenu extends Phaser.Scene {
         this.graphics.fillRect(this.seperatorX, this.seperatorY1, this.scale.width, this.scale.height);
         this.graphics.fillStyle(0x000FFF, 1.0);
         this.graphics.fillRect(this.seperatorX, 0, this.scale.width, 150);
-        this.buttonCasual = this.add.sprite(100, this.seperatorY2 + 40, "button", 1)
-            .setInteractive()
-            .on('pointerdown', () => {
-                this.buttonCasual.setTexture('button', 0);
-                this.searchGame(RoomEnum.CASUAL, this.username);
-            })
-            .on('pointerover', () => this.buttonCasual.setTexture('button', 2))
-            .on('pointerout', () => this.buttonCasual.setTexture('button', 1));
-        this.buttonCompetitive = this.add.sprite(300, this.seperatorY2 + 40, "button", 1)
-            .setInteractive()
-            .on('pointerdown', () => {
-                this.buttonCompetitive.setTexture('button', 0);
-                this.searchGame(RoomEnum.COMPETITIVE, this.username, this.rank);
-            })
-            .on('pointerover', () => this.buttonCompetitive.setTexture('button', 2))
-            .on('pointerout', () => this.buttonCompetitive.setTexture('button', 1));
-        this.buttonReplay = this.add.sprite(this.seperatorX - 100, this.seperatorY2 + 40, "button", 1)
-            .setInteractive()
-            .on('pointerdown', () => {
-                this.buttonReplay.setTexture('button', 0);
-                this.scene.start("UserReplays", this.username);
-            })
-            .on('pointerover', () => this.buttonReplay.setTexture('button', 2))
-            .on('pointerout', () => this.buttonReplay.setTexture('button', 1));
+        this.addButton( 100, this.seperatorY2 + 40, () => { // Casual button
+            this.searchGame(RoomEnum.CASUAL, this.username);
+        });
+        this.addButton( 300, this.seperatorY2 + 40, () => { // Competitive button
+            this.searchGame(RoomEnum.COMPETITIVE, this.username, this.rank);
+        });
+        this.addButton( this.seperatorX - 100, this.seperatorY2 + 40, () => { // Replays button
+            this.scene.start("UserReplays", this.username);
+        });
+        this.addButton( this.seperatorX + 100, this.seperatorY2 + 40, () => { // Add friend button
+            http.open('POST', '/addFriend', true);
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.send("data=" + JSON.stringify(prompt("Friend's ID")));
+        });
         this.add.text(50, this.seperatorY2 + 30, 'Play Casual', {fontFamily: '"Roboto Condensed"'});
         this.add.text(240, this.seperatorY2 + 30, 'Play Competitive', {fontFamily: '"Roboto Condensed"'});
         this.add.text(this.seperatorX - 130, this.seperatorY2 + 30, 'Replays', {fontFamily: '"Roboto Condensed"'});
+        this.add.text(this.seperatorX + 60, this.seperatorY2 + 30, 'Add friend', {fontFamily: '"Roboto Condensed"'});
+    }
+
+    addButton(x, y, onClick) {
+        this.add.sprite(x, y, "button", 1)
+            .setInteractive()
+            .on('pointerdown', function () {
+                this.setTexture('button', 0);
+                onClick();
+            })
+            .on('pointerover', function () {
+                this.setTexture('button', 2)
+            })
+            .on('pointerout', function () {
+                this.setTexture('button', 1)
+            });
     }
 
     update() {
