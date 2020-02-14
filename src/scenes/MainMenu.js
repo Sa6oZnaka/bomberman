@@ -32,16 +32,16 @@ export class MainMenu extends Phaser.Scene {
         this.graphics.fillRect(this.seperatorX, this.seperatorY1, this.scale.width, this.scale.height);
         this.graphics.fillStyle(0x000FFF, 1.0);
         this.graphics.fillRect(this.seperatorX, 0, this.scale.width, 150);
-        this.addButton( 100, this.seperatorY2 + 40, () => { // Casual button
+        this.addButton(100, this.seperatorY2 + 40, () => { // Casual button
             this.searchGame(RoomEnum.CASUAL, this.username);
         });
-        this.addButton( 300, this.seperatorY2 + 40, () => { // Competitive button
+        this.addButton(300, this.seperatorY2 + 40, () => { // Competitive button
             this.searchGame(RoomEnum.COMPETITIVE, this.username, this.rank);
         });
-        this.addButton( this.seperatorX - 100, this.seperatorY2 + 40, () => { // Replays button
+        this.addButton(this.seperatorX - 100, this.seperatorY2 + 40, () => { // Replays button
             this.scene.start("UserReplays", this.username);
         });
-        this.addButton( this.seperatorX + 100, this.seperatorY2 + 40, () => { // Add friend button
+        this.addButton(this.seperatorX + 100, this.seperatorY2 + 40, () => { // Add friend button
             http.open('POST', '/addFriend', true);
             http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             http.send("data=" + JSON.stringify(prompt("Friend's ID")));
@@ -132,6 +132,18 @@ export class MainMenu extends Phaser.Scene {
                     this.add.text(this.seperatorX - 170, 174 + i * sizeY, 'Rank : ', {fontFamily: '"Roboto Condensed"'});
                     this.add.sprite(this.seperatorX - 65, 174 + i * sizeY, "ranks", UserStats.getRankByPoints(data[i].rank_points)).setScale(0.5);
                 }
+                this.getFriends();
+            }
+        }
+    }
+
+    getFriends() {
+        http.open('GET', '/getFriends', true);
+        http.send();
+        http.onreadystatechange = () => {
+            if (http.readyState === 4 && http.status === 200) {
+                let data = JSON.parse(http.responseText);
+                console.log(data);
             }
         }
     }

@@ -114,7 +114,7 @@ export class Room {
         if (user === undefined) {
             return false;
         }
-        if (user.inTransit) {
+        if (user.inTransit()) {
             return false;
         }
         if (Math.abs(pos.x - user.x) + Math.abs(pos.y - user.y) > 1) {

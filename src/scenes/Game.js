@@ -18,10 +18,6 @@ export class Game extends Phaser.Scene {
         super({key: "Game"});
     }
 
-    init(data) {
-        this.room = data.room;
-    }
-
     create() {
         spawned = false;
         gameMap = new GameMap();
@@ -37,7 +33,7 @@ export class Game extends Phaser.Scene {
         keys.set('W', this.input.keyboard.addKey('W'));
         keys.set('Space', this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE));
 
-        socket.connect().emit('spawn', this.room);
+        socket.connect().emit('spawn');
     }
 
     update() {
@@ -62,7 +58,7 @@ export class Game extends Phaser.Scene {
     }
 
     move(x, y) {
-        if (!user.inTransit && gameMap.map[y][x] === FieldEnum.EMPTY) {
+        if (!user.inTransit() && gameMap.map[y][x] === FieldEnum.EMPTY) {
             user.transit(x, y);
             socket.emit('move', new Point(x, y));
         }
@@ -92,9 +88,7 @@ socket.on('move', function (data) {
     if (!spawned) return;
     if (data.id === socket.id) {
         console.warn("Rollback detected!");
-        user.inTransit = false;
-        user.transitionX = 0;
-        user.transitionY = 0;
+        users.set(user.username, new User(data.username, data.x, data.y, null));
     }
 
     users.get(data.id).transit(data.pos.x, data.pos.y);

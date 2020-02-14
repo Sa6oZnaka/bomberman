@@ -39,8 +39,8 @@ module.exports = function (connection, req) {
 
     function rewardOnDraw(userPoints, avgRank) {
         if (userPoints < avgRank)
-            return avgRank / userPoints;
-        return -(userPoints / avgRank);
+            return rewardOnWin(userPoints, avgRank) / 3;
+        return rewardOnLose(userPoints, avgRank) / 3;
     }
 
 };

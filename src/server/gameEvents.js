@@ -1,10 +1,11 @@
 import {RoomEnum} from "../enums/RoomEnum";
 
-exports = module.exports = function (io, serverRooms, connection) {
+module.exports = function (io, serverRooms, connection) {
     io.sockets.on('connection', function (socket) {
         console.log(`ID ${socket.id} connected!`);
 
-        socket.on('spawn', (roomID) => {
+        socket.on('spawn', () => {
+            let roomID = serverRooms.playerRooms.get(socket.id);
             let room = serverRooms.rooms.get(roomID);
             if (room !== undefined) {
                 if (room.users.size > room.required) {

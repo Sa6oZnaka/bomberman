@@ -73,8 +73,20 @@ module.exports = function (app, passport, connection) {
         });
     });
 
+    app.get('/getFriends', isLoggedIn, function (req, res) {
+        let sql = `SELECT u.username, rl.status 
+                  FROM Relationships rl
+                  INNER JOIN Users u
+                  ON (rl.user_id_a = ? AND u.id = rl.user_id_b) OR (rl.user_id_b = ? AND u.id = rl.user_id_a)`;
+        connection.query(sql, [req.user.id, req.user.id], function (error, result) {
+            if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
+            res.send(JSON.stringify(result));
+        });
+    });
+
     app.post('/addFriend', isLoggedIn, function (req, res) {
         let temp = JSON.parse(req.body.data);
+        if(temp == req.user.id) return; // Users can't add self
         let sql = `insert into Relationships(user_id_a, user_id_b) values (?, ?);`;
         connection.query(sql, [req.user.id, temp], function (error, result) {
             if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
