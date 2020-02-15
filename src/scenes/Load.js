@@ -1,4 +1,4 @@
-export class LoadMenu extends Phaser.Scene{
+export class Load extends Phaser.Scene{
     constructor(){
         super("loadMenu");
     }
@@ -6,6 +6,10 @@ export class LoadMenu extends Phaser.Scene{
         this.load.spritesheet('button', 'assets/button_sprite_sheet.png', {
             frameWidth: 193,
             frameHeight: 66
+        });
+        this.load.spritesheet('smallButton', 'assets/smallButtonSprite.png', {
+            frameWidth: 64,
+            frameHeight: 28
         });
         this.load.spritesheet('ranks', 'assets/ranks_sprite_sheet.png', {
             frameWidth: 200,

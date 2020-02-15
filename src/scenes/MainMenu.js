@@ -44,7 +44,8 @@ export class MainMenu extends Phaser.Scene {
         this.addButton(this.seperatorX + 100, this.seperatorY2 + 40, () => { // Add friend button
             http.open('POST', '/addFriend', true);
             http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-            http.send("data=" + JSON.stringify(prompt("Friend's ID")));
+            http.send("data=" + JSON.stringify(prompt("Friend's username")));
+            //this.getFriends();
         });
         this.add.text(50, this.seperatorY2 + 30, 'Play Casual', {fontFamily: '"Roboto Condensed"'});
         this.add.text(240, this.seperatorY2 + 30, 'Play Competitive', {fontFamily: '"Roboto Condensed"'});
@@ -66,6 +67,22 @@ export class MainMenu extends Phaser.Scene {
                 this.setTexture('button', 1)
             });
     }
+
+    addSmallButton(x, y, onClick) {
+        this.add.sprite(x, y, "smallButton", 1)
+            .setInteractive()
+            .on('pointerdown', function () {
+                this.setTexture('smallButton', 0);
+                onClick();
+            })
+            .on('pointerover', function () {
+                this.setTexture('smallButton', 2)
+            })
+            .on('pointerout', function () {
+                this.setTexture('smallButton', 1)
+            });
+    }
+
 
     update() {
         if (room !== null) {
@@ -144,6 +161,28 @@ export class MainMenu extends Phaser.Scene {
             if (http.readyState === 4 && http.status === 200) {
                 let data = JSON.parse(http.responseText);
                 console.log(data);
+
+                for(let i = 0; i < data.length; i ++){
+                    if(data[i].status === 'P') {
+                        this.addSmallButton(this.seperatorX + 10, this.seperatorY1 + 25 + 30 * i, function () {
+                            http.open('POST', '/acceptFriend', true);
+                            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                            http.send("data=" + JSON.stringify(data[i].username));
+                        });
+                        this.graphics.fillStyle(0xFFFF00, 1.0);
+                    }
+                    else if(data[i].status === 'F')
+                        this.graphics.fillStyle(0x008000, 1.0);
+                    else if(data[i].status === 'B')
+                        this.graphics.fillStyle(0x800000, 1.0);
+
+                    this.graphics.fillRect(this.seperatorX + 10, this.seperatorY1 + 10 + 30 * i, this.scale.width - this.seperatorX - 20, 29);
+
+                    this.add.text(this.seperatorX + 20, 165 + i * 30, data[i].username, {fontFamily: '"Roboto Condensed"'});
+
+                    console.log(data[i].username);
+                }
+
             }
         }
     }

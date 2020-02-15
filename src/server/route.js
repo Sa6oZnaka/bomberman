@@ -12,18 +12,17 @@ module.exports = function (app, passport, connection) {
     });
 
     app.post('/login', passport.authenticate('local-login', {
-            successRedirect: '/',
-            failureRedirect: '/login',
-            failureFlash: true
-        }),
-        function (req, res) {
-            if (req.body.remember) {
-                req.session.cookie.maxAge = 1000 * 60 * 3;
-            } else {
-                req.session.cookie.expires = false;
-            }
-            res.redirect('/');
-        });
+        successRedirect: '/',
+        failureRedirect: '/login',
+        failureFlash: true
+    }), function (req, res) {
+        if (req.body.remember) {
+            req.session.cookie.maxAge = 1000 * 60 * 3;
+        } else {
+            req.session.cookie.expires = false;
+        }
+        res.redirect('/');
+    });
 
     app.get('/register', function (req, res) {
         res.render('register.ejs', {
@@ -77,7 +76,7 @@ module.exports = function (app, passport, connection) {
         let sql = `SELECT u.username, rl.status 
                   FROM Relationships rl
                   INNER JOIN Users u
-                  ON (rl.user_id_a = ? AND u.id = rl.user_id_b) OR (rl.user_id_b = ? AND u.id = rl.user_id_a)`;
+                  ON rl.status = 'F' AND (rl.sender_id = ? AND u.id = rl.receiver_id) OR (rl.receiver_id = ? AND u.id = rl.sender_id)`;
         connection.query(sql, [req.user.id, req.user.id], function (error, result) {
             if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
             res.send(JSON.stringify(result));
@@ -85,13 +84,35 @@ module.exports = function (app, passport, connection) {
     });
 
     app.post('/addFriend', isLoggedIn, function (req, res) {
-        let temp = JSON.parse(req.body.data);
-        if(temp == req.user.id) return; // Users can't add self
-        let sql = `insert into Relationships(user_id_a, user_id_b) values (?, ?);`;
-        connection.query(sql, [req.user.id, temp], function (error, result) {
+        let friendName = JSON.parse(req.body.data);
+        if (friendName == req.user.username) return; // Users can't add self
+        let sql = `Select u.id from Users u where u.username = ?;`;
+        connection.query(sql, [friendName], function (error, result) { // get id by username
             if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
+            if (result[0].length === 0) return; // user wasn't found
+            let sql = `insert into Relationships(sender_id, receiver_id) values (?, ?);`;
+            connection.query(sql, [req.user.id, result[0].id], function (error, result) { // add relation
+                if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
+            });
         });
     });
+
+    app.post('/acceptFriend', isLoggedIn, function (req, res) {
+        let friendName = JSON.parse(req.body.data);
+
+        console.log(friendName);
+
+        let sql = `Select u.id from Users u where u.username = ?;`;
+        connection.query(sql, [friendName], function (error, result) { // get id by username
+            if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
+
+            let sql = `UPDATE Relationships SET status='F' WHERE  sender_id=? AND receiver_id=?;`;
+            connection.query(sql, [result[0].id, req.user.id], function (error, result) { // get id by username
+                if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
+            });
+        });
+    });
+
 
     app.get('/logout', function (req, res) {
         req.session.destroy(function (err) {
