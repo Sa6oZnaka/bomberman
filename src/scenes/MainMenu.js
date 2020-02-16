@@ -68,18 +68,18 @@ export class MainMenu extends Phaser.Scene {
             });
     }
 
-    addSmallButton(x, y, onClick) {
-        this.add.sprite(x, y, "smallButton", 1)
+    addSmallButton(x, y, id, onClick) {
+        this.add.sprite(x, y, "smallButton", 0 + id * 3)
             .setInteractive()
             .on('pointerdown', function () {
-                this.setTexture('smallButton', 0);
+                this.setTexture('smallButton', 2 + id * 3);
                 onClick();
             })
             .on('pointerover', function () {
-                this.setTexture('smallButton', 2)
+                this.setTexture('smallButton', 1 + id * 3)
             })
             .on('pointerout', function () {
-                this.setTexture('smallButton', 1)
+                this.setTexture('smallButton', 0 + id * 3)
             });
     }
 
@@ -160,22 +160,24 @@ export class MainMenu extends Phaser.Scene {
         http.onreadystatechange = () => {
             if (http.readyState === 4 && http.status === 200) {
                 let data = JSON.parse(http.responseText);
-                console.log(data);
-
-                for(let i = 0; i < data.length; i ++){
-                    if(data[i].status === 'P') {
-                        this.addSmallButton(this.seperatorX + 10, this.seperatorY1 + 25 + 30 * i, function () {
-                            http.open('POST', '/acceptFriend', true);
-                            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-                            http.send("data=" + JSON.stringify(data[i].username));
-                        });
+                for (let i = 0; i < data.length; i++) {
+                    this.removeRelationButton(this.scale.width - 24, this.seperatorY1 + 25 + 30 * i, data[i].username);
+                    if (data[i].status === 'P') {
+                        this.removeRelationButton(this.scale.width - 24 - 28, this.seperatorY1 + 25 + 30 * i, data[i].username);
+                        this.addAcceptButton(this.scale.width - 24 - 28*2, this.seperatorY1 + 25 + 30 * i, data[i].username);
+                        this.blockUser(this.scale.width - 24 - 28, this.seperatorY1 + 25 + 30 * i, data[i].username);
                         this.graphics.fillStyle(0xFFFF00, 1.0);
-                    }
-                    else if(data[i].status === 'F')
-                        this.graphics.fillStyle(0x008000, 1.0);
-                    else if(data[i].status === 'B')
-                        this.graphics.fillStyle(0x800000, 1.0);
+                    } else if (data[i].status === 'F') {
+                        this.addSmallButton(this.scale.width - 24 - 28*2, this.seperatorY1 + 25 + 30 * i, 3, function () {
 
+                        });
+                        this.removeRelationButton(this.scale.width - 24 - 28, this.seperatorY1 + 25 + 30 * i, data[i].username);
+                        this.blockUser(this.scale.width - 24 - 28, this.seperatorY1 + 25 + 30 * i, data[i].username);
+                        this.graphics.fillStyle(0x008000, 1.0);
+                    }
+                    else if (data[i].status === 'B') {
+                        this.graphics.fillStyle(0x800000, 1.0);
+                    }
                     this.graphics.fillRect(this.seperatorX + 10, this.seperatorY1 + 10 + 30 * i, this.scale.width - this.seperatorX - 20, 29);
 
                     this.add.text(this.seperatorX + 20, 165 + i * 30, data[i].username, {fontFamily: '"Roboto Condensed"'});
@@ -187,6 +189,27 @@ export class MainMenu extends Phaser.Scene {
         }
     }
 
+    addAcceptButton(x, y, username){
+        this.addSmallButton(x, y, 0, function () {
+            http.open('POST', '/acceptFriend', true);
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.send("data=" + JSON.stringify(username));
+        });
+    }
+    removeRelationButton(x, y, username){
+        this.addSmallButton(x, y, 1, function () {
+            http.open('POST', '/removeFriend', true);
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.send("data=" + JSON.stringify(username));
+        });
+    }
+    blockUser(x, y, username){
+        this.addSmallButton(x, y, 2, function () {
+            http.open('POST', '/blockUser', true);
+            http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            http.send("data=" + JSON.stringify(username));
+        });
+    }
 }
 
 socket.on('foundGame', function (roomID) {

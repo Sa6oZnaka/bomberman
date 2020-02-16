@@ -21,18 +21,19 @@ let tables = [ `CREATE TABLE IF NOT EXISTS Users(
     replay_id INT NOT NULL,
     PRIMARY KEY(user_id, replay_id)
 );`,
-`CREATE TABLE IF NOT EXISTS Relationships(
+`CREATE TABLE IF NOT EXISTS User_relations(
     sender_id INT NOT NULL,
     receiver_id INT NOT NULL,
     status char NOT NULL default 'P',
     PRIMARY KEY(sender_id, receiver_id)
 );`,
 `CREATE TABLE IF NOT EXISTS Messages(
+    id int primary key auto_increment not null,
     sender_id INT NOT NULL,
     receiver_id INT NOT NULL,
     message varchar(100) NOT NULL,
     seen BOOLEAN,
-    PRIMARY KEY(sender_id, receiver_id)
+    created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );`];
 // 'P' - pending, 'F' - friends, 'B' - blocked
 

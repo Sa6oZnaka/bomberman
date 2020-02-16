@@ -58,7 +58,7 @@ export class Game extends Phaser.Scene {
     }
 
     move(x, y) {
-        if (!user.inTransit() && gameMap.map[y][x] === FieldEnum.EMPTY) {
+        if (!user.inTransit && gameMap.map[y][x] === FieldEnum.EMPTY) {
             user.transit(x, y);
             socket.emit('move', new Point(x, y));
         }
@@ -88,7 +88,9 @@ socket.on('move', function (data) {
     if (!spawned) return;
     if (data.id === socket.id) {
         console.warn("Rollback detected!");
-        users.set(user.username, new User(data.username, data.x, data.y, null));
+        user.inTransit = false;
+        user.transitionX = 0;
+        user.transitionY = 0;
     }
 
     users.get(data.id).transit(data.pos.x, data.pos.y);

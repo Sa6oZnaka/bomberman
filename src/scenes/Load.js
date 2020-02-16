@@ -7,8 +7,8 @@ export class Load extends Phaser.Scene{
             frameWidth: 193,
             frameHeight: 66
         });
-        this.load.spritesheet('smallButton', 'assets/smallButtonSprite.png', {
-            frameWidth: 64,
+        this.load.spritesheet('smallButton', 'assets/small_button_sprite_sheet.png', {
+            frameWidth: 28,
             frameHeight: 28
         });
         this.load.spritesheet('ranks', 'assets/ranks_sprite_sheet.png', {

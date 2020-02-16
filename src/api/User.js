@@ -8,13 +8,15 @@ export class User {
         this.x = x;
         this.y = y;
         this.size = gameConfig.GRID_CELL_SIZE;
+        this.inTransit = false;
         this.alive = true;
         this.transitionX = 0;
         this.transitionY = 0;
     }
 
     transit(x, y) {
-        if (this.inTransit()) return;
+        if (this.inTransit) return;
+        this.inTransit = true;
         for (let i = 0; i < 10; ++i) {
             setTimeout(() => {
                 this.transitionX += Math.round((x - this.x) * this.size / 10);
@@ -26,11 +28,9 @@ export class User {
             this.transitionY = 0;
             this.x = x;
             this.y = y;
-        }, 100);
-    }
 
-    inTransit(){
-        return this.transitionX !== 0 || this.transitionY !== 0;
+            this.inTransit = false;
+        }, 100);
     }
 
     draw(graphics, enemy) {
