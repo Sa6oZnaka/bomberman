@@ -19,6 +19,8 @@ export class MainMenu extends Phaser.Scene {
     }
 
     create() {
+        socket.emit('sendMessage', "fewfwe");
+
         this.seperatorX = this.scale.width - 350;
         this.seperatorY1 = 150;
         this.seperatorY2 = 680;
@@ -164,12 +166,12 @@ export class MainMenu extends Phaser.Scene {
                     this.removeRelationButton(this.scale.width - 24, this.seperatorY1 + 25 + 30 * i, data[i].username);
                     if (data[i].status === 'P') {
                         this.removeRelationButton(this.scale.width - 24 - 28, this.seperatorY1 + 25 + 30 * i, data[i].username);
-                        this.addAcceptButton(this.scale.width - 24 - 28*2, this.seperatorY1 + 25 + 30 * i, data[i].username);
+                        this.addAcceptButton(this.scale.width - 24 - 28*2, this.seperatorY1 + 25 + 30 * i, data[i]);
                         this.blockUser(this.scale.width - 24 - 28, this.seperatorY1 + 25 + 30 * i, data[i].username);
                         this.graphics.fillStyle(0xFFFF00, 1.0);
                     } else if (data[i].status === 'F') {
-                        this.addSmallButton(this.scale.width - 24 - 28*2, this.seperatorY1 + 25 + 30 * i, 3, function () {
-
+                        this.addSmallButton(this.scale.width - 24 - 28*2, this.seperatorY1 + 25 + 30 * i, 3,  () => {
+                            this.scene.start("Messages", data[i].username);
                         });
                         this.removeRelationButton(this.scale.width - 24 - 28, this.seperatorY1 + 25 + 30 * i, data[i].username);
                         this.blockUser(this.scale.width - 24 - 28, this.seperatorY1 + 25 + 30 * i, data[i].username);
@@ -189,11 +191,11 @@ export class MainMenu extends Phaser.Scene {
         }
     }
 
-    addAcceptButton(x, y, username){
+    addAcceptButton(x, y, data){
         this.addSmallButton(x, y, 0, function () {
             http.open('POST', '/acceptFriend', true);
             http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-            http.send("data=" + JSON.stringify(username));
+            http.send("data=" + JSON.stringify(data.username));
         });
     }
     removeRelationButton(x, y, username){

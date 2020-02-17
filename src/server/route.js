@@ -124,6 +124,33 @@ module.exports = function (app, passport, connection) {
         });
     });
 
+    app.post('/sendMessage', isLoggedIn, function (req, res) {
+        let data = JSON.parse(req.body.data);
+        let sql = `INSERT INTO Messages(sender_id, receiver_id, message) 
+                    SELECT ?, u.id, ?
+                    FROM Users u where u.username = ?;`;
+        connection.query(sql, [req.user.id, data.message, data.username, req.user.id], function (error, result) {
+            if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
+        });
+    });
+
+    app.get('/getMessages', isLoggedIn, function (req, res) {
+
+        console.log(req.param('name'));
+        console.log(req.params, req.body, req.query);
+
+        let sql = `SELECT message
+                    FROM Messages m
+                    INNER JOIN Users u ON u.username = ?
+                    AND m.sender_id = u.id AND m.receiver_id = ?
+                    OR  m.sender_id = ? AND m.receiver_id = u.id`;
+
+        connection.query(sql, [req.query.name, req.user.id, req.user.id], function (error, result) {
+            if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
+            return res.send(JSON.stringify(result));
+        });
+    });
+
     app.get('/logout', function (req, res) {
         req.session.destroy(function (err) {
             res.redirect('/login');
