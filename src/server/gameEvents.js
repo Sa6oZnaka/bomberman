@@ -2,8 +2,6 @@ import {RoomEnum} from "../enums/RoomEnum";
 
 module.exports = function (io, serverRooms, connection) {
     io.sockets.on('connection', function (socket) {
-        console.log(socket.handshake.query.param);
-
         console.log(`ID ${socket.id} connected!`);
 
         socket.on('spawn', () => {
@@ -71,6 +69,7 @@ module.exports = function (io, serverRooms, connection) {
 
         socket.on('disconnect', () => {
             console.log(`ID ${socket.id} disconnected!`);
+            serverRooms.removeOnlineUser(socket.id);
             if (serverRooms.playerRooms.get(socket.id) !== null)
                 markAsDead(serverRooms.playerRooms.get(socket.id), [socket.id]);
         });

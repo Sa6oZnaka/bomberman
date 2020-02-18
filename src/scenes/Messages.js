@@ -1,3 +1,5 @@
+import {UserMessages} from "../api/UserMessages.js";
+
 const http = new XMLHttpRequest();
 
 export class Messages extends Phaser.Scene {
@@ -38,23 +40,24 @@ export class Messages extends Phaser.Scene {
                 name: username
             },
             success:(response) => {
-                console.log(response);
-                this.showMessages(JSON.parse(response));
+                this.messages = new UserMessages(JSON.parse(response));
+                this.showMessages();
             },
             error: function(xhr) {
-                //Do Something to handle error
+                console.warn(xhr);
             }
         });
     }
 
-    showMessages(messages){
-        // TODO
+    showMessages(){
+        console.log(this.messages.messages);
+        let messages = this.messages.messages;
         for(let i = 0; i < messages.length; i ++){
-            // select color by sender
+            // TODO Select color by sender
             // if () ......
             this.graphics.fillStyle(0x000080, 1.0);
-            this.graphics.fillRect(0, i * 40, 200, 39);
-            this.add.text(0, i * 40, messages[i].message, {fontFamily: '"Roboto Condensed"'});
+            this.graphics.fillRect(100, i * 40, 200, 39);
+            this.add.text(100, i * 40, messages[i].message, {fontFamily: '"Roboto Condensed"'});
         }
     }
 

@@ -1,4 +1,4 @@
-module.exports = function (app, passport, connection) {
+module.exports = function (app, passport, connection, serverRooms) {
 
     app.get('/login', function (req, res) {
         res.render('login.ejs', {
@@ -47,6 +47,7 @@ module.exports = function (app, passport, connection) {
             rank: req.user.rank_points,
             wins: req.user.wins,
         }));
+        serverRooms.addOnlineUser(req.cookies.io, req.user.username);
     });
 
     app.get('/getUserReplays', isLoggedIn, function (req, res) {
@@ -135,17 +136,12 @@ module.exports = function (app, passport, connection) {
     });
 
     app.get('/getMessages', isLoggedIn, function (req, res) {
-
-        console.log(req.param('name'));
-        console.log(req.params, req.body, req.query);
-
-        let sql = `SELECT message
+        let sql = `SELECT m.*
                     FROM Messages m
-                    INNER JOIN Users u ON u.username = ?
-                    AND m.sender_id = u.id AND m.receiver_id = ?
-                    OR  m.sender_id = ? AND m.receiver_id = u.id`;
-
-        connection.query(sql, [req.query.name, req.user.id, req.user.id], function (error, result) {
+                    INNER JOIN Users u ON 
+                    u.username = ? AND (m.sender_id = u.id AND m.receiver_id = ?) OR  
+                    u.username = ? AND (m.sender_id = ? AND m.receiver_id = u.id);`;
+        connection.query(sql, [req.query.name, req.user.id, req.query.name, req.user.id], function (error, result) {
             if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
             return res.send(JSON.stringify(result));
         });

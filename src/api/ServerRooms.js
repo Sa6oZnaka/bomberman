@@ -4,9 +4,20 @@ import {gameConfig} from "../../config/gameConfig.js";
 export class ServerRooms {
 
     constructor() {
+        this.onlineUsers = new Map();
         this.rooms = new Map();
         this.playerRooms = new Map();
         this.lastRoomID = 0;
+    }
+
+    addOnlineUser(socketID, username) {
+        this.onlineUsers.set(username, socketID);
+    }
+
+    removeOnlineUser(id) {
+        let keys = [...this.onlineUsers].find(([key, val]) => val === id);
+        if (keys !== undefined)
+            this.onlineUsers.delete(keys[0]);
     }
 
     disconnect(userID) {
@@ -36,10 +47,10 @@ export class ServerRooms {
         for (let [key, room] of this.rooms.entries()) {
             if (room.type === type && room.canBeJoined()) {
                 if (room.users.size > roomPlayers) {
-                    if (!room.hasMatchMaking){
+                    if (!room.hasMatchMaking) {
                         roomID = key;
                         roomPlayers = room.users.size;
-                    }else{
+                    } else {
                         let rankGap = Math.abs(room.getAverageRank() - rank);
                         if (rankGap <= gameConfig.MAX_RANK_POINTS_GAP && roomRank > rankGap) {
                             roomID = key;
