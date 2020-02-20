@@ -1,3 +1,7 @@
+var crypto = require('crypto'),
+    algorithm = 'aes-256-ctr',
+    password = 'd6F3EfeP';
+
 module.exports = function (app, passport, connection, serverRooms) {
 
     app.get('/login', function (req, res) {
@@ -130,7 +134,7 @@ module.exports = function (app, passport, connection, serverRooms) {
         let sql = `INSERT INTO Message(sender_id, receiver_id, message) 
                     SELECT ?, u.id, ?
                     FROM User u where u.username = ?;`;
-        connection.query(sql, [req.user.id, data.message, data.username, req.user.id], function (error, result) {
+        connection.query(sql, [req.user.id, encrypt(data.message), data.username, req.user.id], function (error, result) {
             if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
         });
     });
@@ -143,6 +147,9 @@ module.exports = function (app, passport, connection, serverRooms) {
                     u.username = ? AND (m.sender_id = ? AND m.receiver_id = u.id);`;
         connection.query(sql, [req.query.name, req.user.id, req.query.name, req.user.id], function (error, result) {
             if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
+            for(let i = 0; i < result.length; i ++){
+                result[i].message = decrypt(result[i].message);
+            }
             return res.send(JSON.stringify(result));
         });
     });
@@ -152,6 +159,20 @@ module.exports = function (app, passport, connection, serverRooms) {
             res.redirect('/login');
         });
     });
+
+    function encrypt(text){
+        let cipher = crypto.createCipher(algorithm,password);
+        let crypted = cipher.update(text,'utf8','hex');
+        crypted += cipher.final('hex');
+        return crypted;
+    }
+
+    function decrypt(text){
+        let decipher = crypto.createDecipher(algorithm,password);
+        let dec = decipher.update(text,'hex','utf8');
+        dec += decipher.final('utf8');
+        return dec;
+    }
 };
 
 function isLoggedIn(req, res, next) {
