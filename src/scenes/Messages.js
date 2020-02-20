@@ -19,6 +19,11 @@ export class Messages extends Phaser.Scene {
         this.add.sprite(40, 20, 'backButton')
             .setInteractive()
             .on('pointerdown', (pointer) => {
+                this.scene.start("MainMenu");
+            })
+        this.add.sprite(400, 20, 'newButton')
+            .setInteractive()
+            .on('pointerdown', (pointer) => {
                 this.sendMessage(prompt("Message"));
             });
     }

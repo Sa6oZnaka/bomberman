@@ -17,6 +17,7 @@ export class Load extends Phaser.Scene{
         });
         this.load.image('watchButton', 'assets/watch_button.png');
         this.load.image('backButton', 'assets/back_button.png');
+        this.load.image('newButton', 'assets/new_message_button.png');
     }
     create(){
         this.add.text(20, 20, "Loading...");
