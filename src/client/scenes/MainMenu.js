@@ -1,5 +1,5 @@
-import {RoomEnum} from "../enums/RoomEnum.js";
-import {UserStats} from "../api/UserStats.js";
+import {RoomEnum} from "../../enums/RoomEnum.js";
+import {UserStats} from "../../api/UserStats.js";
 
 export let socket = io();
 const http = new XMLHttpRequest();

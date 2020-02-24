@@ -1,7 +1,7 @@
-import {GameMap} from "../api/GameMap.js";
-import {FieldEnum} from "../enums/FieldEnum.js";
-import {Point} from "../api/Point.js";
-import {User} from "../api/User.js";
+import {GameMap} from "../../api/GameMap.js";
+import {FieldEnum} from "../../enums/FieldEnum.js";
+import {Point} from "../../api/Point.js";
+import {User} from "../../api/User.js";
 import {socket} from "./MainMenu.js";
 
 let gameMap,

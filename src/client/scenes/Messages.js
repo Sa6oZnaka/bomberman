@@ -1,4 +1,4 @@
-import {UserMessages} from "../api/UserMessages.js";
+import {UserMessages} from "../../api/UserMessages.js";
 
 const http = new XMLHttpRequest();
 
