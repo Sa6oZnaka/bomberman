@@ -1,6 +1,6 @@
-import {GameMap} from "../api/GameMap.js";
-import {ActionEnum} from "../enums/ActionEnum.js";
-import {User} from "../api/User.js";
+import {GameMap} from "../../api/GameMap.js";
+import {ActionEnum} from "../../enums/ActionEnum.js";
+import {User} from "../../api/User.js";
 
 export class Replay extends Phaser.Scene {
 

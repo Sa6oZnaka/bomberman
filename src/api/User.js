@@ -26,7 +26,6 @@ export class User {
         setTimeout(() => {
             this.transitionX = 0;
             this.transitionY = 0;
-
             this.x = x;
             this.y = y;
 

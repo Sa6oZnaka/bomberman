@@ -8,7 +8,7 @@
 
 **Bug fixes:**
 
-- Fixed now being able to gain rank points when user rank is 0
+- Fixed not being able to gain rank points when user's rank_points = 0
 
 ## 00.02.00 - Dec. 31, 2019
 

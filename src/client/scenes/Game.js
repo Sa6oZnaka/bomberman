@@ -1,7 +1,7 @@
-import {GameMap} from "../api/GameMap.js";
-import {FieldEnum} from "../enums/FieldEnum.js";
-import {Point} from "../api/Point.js";
-import {User} from "../api/User.js";
+import {GameMap} from "../../api/GameMap.js";
+import {FieldEnum} from "../../enums/FieldEnum.js";
+import {Point} from "../../api/Point.js";
+import {User} from "../../api/User.js";
 import {socket} from "./MainMenu.js";
 
 let gameMap,
@@ -16,10 +16,6 @@ export class Game extends Phaser.Scene {
 
     constructor() {
         super({key: "Game"});
-    }
-
-    init(data) {
-        this.room = data.room;
     }
 
     create() {
@@ -37,7 +33,7 @@ export class Game extends Phaser.Scene {
         keys.set('W', this.input.keyboard.addKey('W'));
         keys.set('Space', this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE));
 
-        socket.connect().emit('spawn', this.room);
+        socket.connect().emit('spawn');
     }
 
     update() {
