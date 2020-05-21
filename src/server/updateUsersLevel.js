@@ -11,7 +11,7 @@ module.exports = function (connection, req) {
         else
             levelReward = serverConfig.LEVEL_POINTS_ON_LOSE;
         connection.query(`
-                UPDATE User 
+                UPDATE user 
                 SET 
                 level_points = level_points + ?
                 WHERE

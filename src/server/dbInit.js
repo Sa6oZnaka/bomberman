@@ -2,7 +2,7 @@ let mysql = require('mysql'),
     db = 'bomberman',
     dbconfig = require('../../config/databaseConfig');
 let connection = mysql.createConnection(dbconfig);
-let tables = [ `CREATE TABLE IF NOT EXISTS User(
+let tables = [ `CREATE TABLE IF NOT EXISTS user(
     id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL,
     password VARCHAR(100) NOT NULL,
@@ -10,30 +10,30 @@ let tables = [ `CREATE TABLE IF NOT EXISTS User(
     rank_points FLOAT UNSIGNED NOT NULL DEFAULT 1,
     level_points FLOAT UNSIGNED NOT NULL DEFAULT 0
 );`,
-`CREATE TABLE IF NOT EXISTS Replay(
+`CREATE TABLE IF NOT EXISTS replay(
     id INT PRIMARY KEY AUTO_INCREMENT,
     jsonData JSON NOT NULL,
     winner VARCHAR(50),
     replay_date DATETIME NOT NULL
 );`,
-`CREATE TABLE IF NOT EXISTS User_replay(
+`CREATE TABLE IF NOT EXISTS user_replay(
     user_id INT NOT NULL,
     replay_id INT NOT NULL,
     
     PRIMARY KEY (user_id, replay_id),
-    FOREIGN KEY (user_id) REFERENCES User (id),
-    FOREIGN KEY (replay_id) REFERENCES Replay (id)
+    FOREIGN KEY (user_id) REFERENCES user (id),
+    FOREIGN KEY (replay_id) REFERENCES replay (id)
 );`,
-`CREATE TABLE IF NOT EXISTS User_relation(
+`CREATE TABLE IF NOT EXISTS user_relation(
     sender_id INT NOT NULL,
     receiver_id INT NOT NULL,
     status char NOT NULL DEFAULT 'P',
     
     PRIMARY KEY(sender_id, receiver_id),
-    FOREIGN KEY (sender_id) REFERENCES User (id),
-    FOREIGN KEY (receiver_id) REFERENCES User (id)
+    FOREIGN KEY (sender_id) REFERENCES user (id),
+    FOREIGN KEY (receiver_id) REFERENCES user (id)
 );`,
-`CREATE TABLE IF NOT EXISTS Message(
+`CREATE TABLE IF NOT EXISTS message(
     id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     sender_id INT NOT NULL,
     receiver_id INT NOT NULL,
@@ -41,8 +41,8 @@ let tables = [ `CREATE TABLE IF NOT EXISTS User(
     seen BOOLEAN,
     stamp timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
-    FOREIGN KEY (sender_id)   REFERENCES User (id),
-    FOREIGN KEY (receiver_id) REFERENCES User (id)
+    FOREIGN KEY (sender_id)   REFERENCES user (id),
+    FOREIGN KEY (receiver_id) REFERENCES user (id)
 );`];
 // 'P' - pending, 'F' - friends, 'B' - blocked
 

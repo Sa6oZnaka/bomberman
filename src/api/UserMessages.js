@@ -4,8 +4,4 @@ export class UserMessages {
         this.messages = messages;
     }
 
-    addMessage(messages, sender){
-
-    }
-
 }

@@ -50,11 +50,21 @@ module.exports = function (app, passport, connection, serverRooms) {
         serverRooms.addOnlineUser(req.cookies.io, req.user.username);
     });
 
+    app.get('/getUserID', isLoggedIn, function (req, res) {
+        let sql =
+            `SELECT u.id 
+            FROM user u WHERE u.id = ?`;
+        connection.query(sql, [req.user.id], function (error, result) {
+            if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
+            res.send(JSON.stringify(result));
+        });
+    });
+
     app.get('/getUserReplays', isLoggedIn, function (req, res) {
         let sql =
             `SELECT f.* 
-            FROM User_replay pf
-            INNER JOIN Replay f
+            FROM user_replay pf
+            INNER JOIN replay f
             ON f.id = pf.replay_id AND pf.user_id = ?`;
         connection.query(sql, [req.user.id], function (error, result) {
             if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
@@ -75,8 +85,8 @@ module.exports = function (app, passport, connection, serverRooms) {
 
     app.get('/getFriends', isLoggedIn, function (req, res) {
         let sql = `SELECT u.username, rl.status 
-                  FROM User_relation rl
-                  INNER JOIN User u
+                  FROM user_relation rl
+                  INNER JOIN user u
                   ON rl.status = 'F' AND (rl.sender_id = ? AND u.id = rl.receiver_id) OR (rl.receiver_id = ? AND u.id = rl.sender_id)
                   ORDER BY status DESC`;
         connection.query(sql, [req.user.id, req.user.id], function (error, result) {
@@ -88,10 +98,10 @@ module.exports = function (app, passport, connection, serverRooms) {
     app.post('/addFriend', isLoggedIn, function (req, res) {
         let friendName = JSON.parse(req.body.data);
         if (friendName == req.user.username) return; // User can't add self
-        let sql = `INSERT INTO User_relation(sender_id, receiver_id) 
+        let sql = `INSERT INTO user_relation(sender_id, receiver_id) 
                     SELECT ?, u.id
-                    FROM User u where u.username = ? AND 
-                    NOT EXISTS(SELECT * FROM  User_relation ur 
+                    FROM user u where u.username = ? AND 
+                    NOT EXISTS(SELECT * FROM  user_relation ur 
                     WHERE ur.sender_id = u.id AND ur.receiver_id = ?);`;
         connection.query(sql, [req.user.id, friendName, req.user.id], function (error, result) {
             if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
@@ -99,7 +109,7 @@ module.exports = function (app, passport, connection, serverRooms) {
     });
 
     app.post('/acceptFriend', isLoggedIn, function (req, res) {
-        let sql = `UPDATE User_relation LEFT JOIN User u on u.username = ? 
+        let sql = `UPDATE user_relation LEFT JOIN user u on u.username = ? 
                     SET status='F' WHERE sender_id = u.id AND receiver_id = ?;`;
         connection.query(sql, [JSON.parse(req.body.data), req.user.id], function (error, result) {
             if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
@@ -107,7 +117,7 @@ module.exports = function (app, passport, connection, serverRooms) {
     });
 
     app.post('/blockUser', isLoggedIn, function (req, res) {
-        let sql = `UPDATE User_relation LEFT JOIN User u on u.username = ? 
+        let sql = `UPDATE user_relation LEFT JOIN user u on u.username = ? 
                     SET status='B' 
                     WHERE (sender_id = u.id AND receiver_id = ?) 
                     OR    (sender_id = ? AND receiver_id = u.id);`;
@@ -117,9 +127,9 @@ module.exports = function (app, passport, connection, serverRooms) {
     });
 
     app.post('/removeFriend', isLoggedIn, function (req, res) {
-        let sql = 'delete from User_relation \n' +
-            'where (sender_id = (select id from User u where u.username = ?) AND receiver_id = ?)\n' +
-            'OR (receiver_id = (select id from User u where u.username = ?) AND sender_id = ?)';
+        let sql = 'delete from user_relation \n' +
+            'where (sender_id = (select id from user u where u.username = ?) AND receiver_id = ?)\n' +
+            'OR (receiver_id = (select id from user u where u.username = ?) AND sender_id = ?)';
         connection.query(sql, [JSON.parse(req.body.data), req.user.id, JSON.parse(req.body.data), req.user.id], function (error, result) {
             if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
         });
@@ -127,9 +137,9 @@ module.exports = function (app, passport, connection, serverRooms) {
 
     app.post('/sendMessage', isLoggedIn, function (req, res) {
         let data = JSON.parse(req.body.data);
-        let sql = `INSERT INTO Message(sender_id, receiver_id, message) 
+        let sql = `INSERT INTO message(sender_id, receiver_id, message) 
                     SELECT ?, u.id, ?
-                    FROM User u where u.username = ?;`;
+                    FROM user u where u.username = ?;`;
         connection.query(sql, [req.user.id,  require('./encryption').encrypt(data.message), data.username, req.user.id], function (error, result) {
             if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
         });
@@ -137,7 +147,7 @@ module.exports = function (app, passport, connection, serverRooms) {
 
     app.get('/getMessages', isLoggedIn, function (req, res) {
         let sql = `SELECT m.*
-                    FROM Message m
+                    FROM message m
                     INNER JOIN User u ON 
                     u.username = ? AND (m.sender_id = u.id AND m.receiver_id = ?) OR  
                     u.username = ? AND (m.sender_id = ? AND m.receiver_id = u.id);`;

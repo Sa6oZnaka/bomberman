@@ -28,11 +28,11 @@ export class MainMenu extends Phaser.Scene {
         this.getUser();
         this.text = this.add.text(10, 200, '', {fill: '#00ff00'});
         this.graphics = this.add.graphics();
-        this.graphics.fillStyle(0x0000FF, 1.0);
+        this.graphics.fillStyle(0xD9514E, 1.0);
         this.graphics.fillRect(0, this.seperatorY2, this.seperatorX, this.scale.height);
-        this.graphics.fillStyle(0x00FFFF, 1.0);
+        this.graphics.fillStyle(0x2A2B2D, 1.0);
         this.graphics.fillRect(this.seperatorX, this.seperatorY1, this.scale.width, this.scale.height);
-        this.graphics.fillStyle(0x000FFF, 1.0);
+        this.graphics.fillStyle(0x2DA8D8, 1.0);
         this.graphics.fillRect(this.seperatorX, 0, this.scale.width, 150);
         this.addButton(100, this.seperatorY2 + 40, () => { // Casual button
             this.searchGame(RoomEnum.CASUAL, this.username);
@@ -53,6 +53,11 @@ export class MainMenu extends Phaser.Scene {
         this.add.text(240, this.seperatorY2 + 30, 'Play Competitive', {fontFamily: '"Roboto Condensed"'});
         this.add.text(this.seperatorX - 130, this.seperatorY2 + 30, 'Replays', {fontFamily: '"Roboto Condensed"'});
         this.add.text(this.seperatorX + 60, this.seperatorY2 + 30, 'Add friend', {fontFamily: '"Roboto Condensed"'});
+
+        this.add.text(this.seperatorX + 10, this.seperatorY1, 'Friend List', {fontFamily: '"Roboto Condensed"'});
+        this.add.text(12 , this.seperatorY1 - 20, 'Leaderboard', {fontFamily: '"Roboto Condensed"'});
+
+        this.add.text(12 , 35, 'Bomberman', {fontFamily: '"Roboto Condensed"', fontSize: 80});
     }
 
     addButton(x, y, onClick) {
@@ -118,9 +123,9 @@ export class MainMenu extends Phaser.Scene {
                 this.userStats = new UserStats(data.level, this.rank, data.wins);
                 this.add.text(this.seperatorX + margin, 6, 'Username : ' + this.username, {fontFamily: '"Roboto Condensed"'});
                 this.add.text(this.seperatorX + margin, 26, 'Wins: ' + data.wins, {fontFamily: '"Roboto Condensed"'});
-                this.graphics.fillStyle(0x4f4f4f, 1.0);
+                this.graphics.fillStyle(0x2A2B2D, 1.0);
                 this.graphics.fillRect(this.seperatorX + margin, 50, this.scale.width - this.seperatorX - margin * 2, 20);
-                this.graphics.fillStyle(0x0, 1.0);
+                this.graphics.fillStyle(0xD9514E, 1.0);
                 this.graphics.fillRect(this.seperatorX + margin, 50, this.userStats.getNextLevelProgress() * (this.scale.width - this.seperatorX - margin * 2), 20);
                 this.add.text(this.seperatorX + margin, 50, 'Level : ' + this.userStats.getLevel(), {fontFamily: '"Roboto Condensed"'});
                 this.add.sprite(this.seperatorX + margin + 50, 100, "ranks", this.userStats.getRankId()).setScale(0.5);
@@ -142,9 +147,9 @@ export class MainMenu extends Phaser.Scene {
 
                 for (let i = 0; i < data.length; i++) {
                     if (data[i].username === this.username)
-                        this.graphics.fillStyle(0xFF6347, 1.0);
+                        this.graphics.fillStyle(0xD9514E, 1.0);
                     else
-                        this.graphics.fillStyle(0x4f4f4f, 1.0);
+                        this.graphics.fillStyle(0x2A2B2D, 1.0);
                     this.graphics.fillRect(gap, 151 + i * sizeY, this.seperatorX - gap * 2, sizeY - 2);
                     this.add.text(18, 174 + i * sizeY, '#' + (i + 1), {fontFamily: '"Roboto Condensed"'});
                     this.add.text(50, 174 + i * sizeY, 'Username : ' + data[i].username, {fontFamily: '"Roboto Condensed"'});
@@ -163,26 +168,26 @@ export class MainMenu extends Phaser.Scene {
             if (http.readyState === 4 && http.status === 200) {
                 let data = JSON.parse(http.responseText);
                 for (let i = 0; i < data.length; i++) {
-                    this.removeRelationButton(this.scale.width - 24, this.seperatorY1 + 25 + 30 * i, data[i].username);
+                    this.removeRelationButton(this.scale.width - 24, this.seperatorY1 + 35 + 30 * i, data[i].username);
                     if (data[i].status === 'P') {
-                        this.removeRelationButton(this.scale.width - 24 - 28, this.seperatorY1 + 25 + 30 * i, data[i].username);
-                        this.addAcceptButton(this.scale.width - 24 - 28*2, this.seperatorY1 + 25 + 30 * i, data[i]);
-                        this.blockUser(this.scale.width - 24 - 28, this.seperatorY1 + 25 + 30 * i, data[i].username);
+                        this.removeRelationButton(this.scale.width - 24 - 28, this.seperatorY1 + 35 + 30 * i, data[i].username);
+                        this.addAcceptButton(this.scale.width - 24 - 28*2, this.seperatorY1 + 35 + 30 * i, data[i]);
+                        this.blockUser(this.scale.width - 24 - 28, this.seperatorY1 + 35 + 30 * i, data[i].username);
                         this.graphics.fillStyle(0xFFFF00, 1.0);
                     } else if (data[i].status === 'F') {
-                        this.addSmallButton(this.scale.width - 24 - 28*2, this.seperatorY1 + 25 + 30 * i, 3,  () => {
+                        this.addSmallButton(this.scale.width - 24 - 28*2, this.seperatorY1 + 35 + 30 * i, 3,  () => {
                             this.scene.start("Messages", data[i].username);
                         });
-                        this.removeRelationButton(this.scale.width - 24 - 28, this.seperatorY1 + 25 + 30 * i, data[i].username);
-                        this.blockUser(this.scale.width - 24 - 28, this.seperatorY1 + 25 + 30 * i, data[i].username);
+                        this.removeRelationButton(this.scale.width - 24 - 28, this.seperatorY1 + 35 + 30 * i, data[i].username);
+                        this.blockUser(this.scale.width - 24 - 28, this.seperatorY1 + 35 + 30 * i, data[i].username);
                         this.graphics.fillStyle(0x008000, 1.0);
                     }
                     else if (data[i].status === 'B') {
                         this.graphics.fillStyle(0x800000, 1.0);
                     }
-                    this.graphics.fillRect(this.seperatorX + 10, this.seperatorY1 + 10 + 30 * i, this.scale.width - this.seperatorX - 20, 29);
+                    this.graphics.fillRect(this.seperatorX + 10, this.seperatorY1 + 20 + 30 * i, this.scale.width - this.seperatorX - 20, 29);
 
-                    this.add.text(this.seperatorX + 20, 165 + i * 30, data[i].username, {fontFamily: '"Roboto Condensed"'});
+                    this.add.text(this.seperatorX + 20, 175 + i * 30, data[i].username, {fontFamily: '"Roboto Condensed"'});
 
                     console.log(data[i].username);
                 }

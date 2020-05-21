@@ -1,5 +1,5 @@
 module.exports = function (connection, req) {
-    let sql = `INSERT INTO Replay (
+    let sql = `INSERT INTO replay (
         jsonData,
         winner,
         replay_date) VALUES (?, ?, NOW())`;
@@ -11,9 +11,9 @@ module.exports = function (connection, req) {
         if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
         let replayId = result.insertId;
         for (let [key, value] of new Map(JSON.parse(req.players)).entries()) {
-            connection.query(`select id From User where username = ?`, [value.username], (error, result) => {
+            connection.query(`select id From user where username = ?`, [value.username], (error, result) => {
                 if (error) return console.error("\x1b[33m" + error.message + "\x1b[0m");
-                let sql2 = `INSERT INTO User_replay (user_id, replay_id) 
+                let sql2 = `INSERT INTO user_replay (user_id, replay_id) 
                                 VALUES (?, ?);`;
                 let data2 = [
                     result[0].id,
