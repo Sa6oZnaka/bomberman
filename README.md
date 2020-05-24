@@ -4,10 +4,11 @@
 
 Make sure you have [NodeJS](https://nodejs.org/en/) and [MySQL](https://www.mysql.com/) installed.
 1. Clone the repo `git clone https://github.com/Sa6oZnaka/bomberman`.
-2. Run `npm install` to install NodeJS dependencies.
-3. Edit [databaseConfig.js](config/databaseConfig.js) `./config/databaseConfig.js` to your [MySQL](https://www.mysql.com/) login information.
-4. Run `npm start` to start the server.
-5. Open [https://localhost:3000](https://localhost:3000) in your browser.
+2. Go to the project folder `cd bomberman`
+3. Run `npm install` to install NodeJS dependencies.
+4. Edit [databaseConfig.js](config/databaseConfig.js) `./config/databaseConfig.js` to your [MySQL](https://www.mysql.com/) login information.
+5. Run `npm start` to start the server.
+6. Open [https://localhost:3000](https://localhost:3000) in your browser.
 
 ## Versions - [Change log](CHANGELOG.md)
 - 00.03.00
