@@ -2,11 +2,13 @@ import {GameMap} from "../../api/GameMap.js";
 import {FieldEnum} from "../../enums/FieldEnum.js";
 import {Point} from "../../api/Point.js";
 import {User} from "../../api/User.js";
+import {User2} from "../../api/User2.js";
 import {socket} from "./MainMenu.js";
 
 let gameMap,
     users,
     user,
+    user2,
     keys,
     spawned,
     result,
@@ -21,8 +23,10 @@ export class Game extends Phaser.Scene {
     create() {
         spawned = false;
         gameMap = new GameMap();
+        gameMap.game = this;
         users = new Map();
         user = new User();
+
         endGame = false;
         this.graphics = this.add.graphics();
 
@@ -34,11 +38,15 @@ export class Game extends Phaser.Scene {
         keys.set('Space', this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE));
 
         socket.connect().emit('spawn');
+
+        socket.on('spawn', this.handleSpawn);
+        socket.on('placeBomb', this.handlePlaceBomb);
+        socket.on('newUser', this.handleNewUser);
     }
 
     update() {
-        this.graphics.clear();
-        gameMap.draw(this.graphics);
+        //this.graphics.clear();
+        //this.draw(this.graphics);
 
         if (spawned) {
             if (keys.get('A').isDown) this.move(user.x - 1, user.y);
@@ -57,15 +65,54 @@ export class Game extends Phaser.Scene {
         if (endGame) this.endGame(result);
     }
 
-    move(x, y) {
-        if (!user.inTransit && gameMap.map[y][x] === FieldEnum.EMPTY) {
-            user.transit(x, y);
-            socket.emit('move', new Point(x, y));
+    handleSpawn = (data) => {
+        if(user2 != null) return;
+
+        console.log("spawn");
+        gameMap.map = data.map;
+        let u2 = new Map(JSON.parse(data.users));
+        for (let [key, value] of u2.entries()) {
+            users.set(key, new User(value.username, value.x, value.y, null));
         }
+
+        user = users.get(socket.id);
+
+        let userSprite = this.add.sprite(user.x * 40 + 20, user.y * 40 + 20, 'player1');
+        user2 = new User2("?", userSprite, "?");
+
+        spawned = true;
+
+        gameMap.draw();
     }
 
     placeBomb() {
         socket.emit('placeBomb');
+
+        this.add.sprite(user.x * 40 + 20, user.y * 40 + 20, 'bomb');
+    }
+
+    handlePlaceBomb = (pos) => {
+        gameMap.placeBomb(pos.x, pos.y);
+
+        this.add.sprite(pos.x * 40 + 20, pos.y * 40 + 20, 'bomb');
+    }
+
+    handleNewUser = (data) => {
+        if (!spawned) return;
+        users.set(data.id, new User(data.username, data.user.x, data.user.y, null));
+        gameMap.clearForPlayer(data.user.x, data.user.y);
+    }
+
+    move(x, y) {
+        if (!user.inTransit && gameMap.map[y][x] === FieldEnum.EMPTY) {
+
+            user.transit(x, y);
+            socket.emit('move', new Point(x, y));
+
+
+
+            user2.transit(x, y, this.tweens);
+        }
     }
 
     endGame(result) {
@@ -73,16 +120,6 @@ export class Game extends Phaser.Scene {
     }
 
 }
-
-socket.on('spawn', function (data) {
-    gameMap.map = data.map;
-    let u2 = new Map(JSON.parse(data.users));
-    for (let [key, value] of u2.entries()) {
-        users.set(key, new User(value.username, value.x, value.y, null));
-    }
-    user = users.get(socket.id);
-    spawned = true;
-});
 
 socket.on('move', function (data) {
     if (!spawned) return;
@@ -96,18 +133,8 @@ socket.on('move', function (data) {
     users.get(data.id).transit(data.pos.x, data.pos.y);
 });
 
-socket.on('placeBomb', function (pos) {
-    gameMap.placeBomb(pos.x, pos.y);
-});
-
 socket.on('explode', function (pos) {
     gameMap.detonate(pos.x, pos.y);
-});
-
-socket.on('newUser', function (data) {
-    if (!spawned) return;
-    users.set(data.id, new User(data.username, data.user.x, data.user.y, null));
-    gameMap.clearForPlayer(data.user.x, data.user.y);
 });
 
 socket.on('disconnectUser', function (id) {

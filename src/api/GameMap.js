@@ -5,6 +5,7 @@ export class GameMap {
 
     constructor(x, y) {
         this.map = GameMap.init(x, y);
+        //this.game = null;
     }
 
     static init(x, y) {
@@ -111,22 +112,31 @@ export class GameMap {
         if (!this.outOfBonds(x, y) && this.map[y][x] !== FieldEnum.BOMB) {
             this.map[y][x] = FieldEnum.BOMB;
         }
+
     }
 
-    draw(graphics) {
+    // Called when the player spawns
+    draw() {
+
+        var graphics = this.game.graphics;
+        graphics.clear;
+
         for (let i = 0; i < this.map.length; i++) {
             for (let j = 0; j < this.map[0].length; j++) {
-                if (this.map[i][j] === FieldEnum.EMPTY)
+                if (this.map[i][j] === FieldEnum.EMPTY) {
                     graphics.fillStyle(0x009933, 1.0);
-                else if (this.map[i][j] === FieldEnum.STONE)
-                    graphics.fillStyle(0x808080, 1.0);
-                else if (this.map[i][j] === FieldEnum.BARRICADE)
+                    graphics.fillRect(j * 40, i * 40, 40, 40);
+                }else if (this.map[i][j] === FieldEnum.STONE) {
+
+                    this.game.add.sprite(j * 40 + 20, i * 40 + 20, 'stone')
+
+                }else if (this.map[i][j] === FieldEnum.BARRICADE) {
                     graphics.fillStyle(0x802b00, 1.0);
-                else if (this.map[i][j] === FieldEnum.EXPLOSION)
-                    graphics.fillStyle(0xff0000, 1.0);
-                else
+                    graphics.fillRect(j * 40, i * 40, 40, 40);
+                } else {
                     graphics.fillStyle(0x000000, 1.0);
-                graphics.fillRect(j * 40, i * 40, 40, 40);
+                    graphics.fillRect(j * 40, i * 40, 40, 40);
+                }
             }
         }
     }

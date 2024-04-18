@@ -19,6 +19,15 @@ export class Load extends Phaser.Scene{
         this.load.image('backButton', 'assets/back_button.png');
         this.load.image('newButton', 'assets/new_message_button.png');
         this.load.image('refreshButton', 'assets/refresh_button.png');
+
+        this.load.image('stone', 'assets/stone01.png');
+        this.load.image('bomb', 'assets/bomb.png')
+
+        this.load.image('player1', 'assets/player1.png');
+        this.load.spritesheet('player0', 'assets/player0.png', {
+            frameWidth: 125,
+            frameHeight: 125
+        });
     }
     create(){
         this.add.text(20, 20, "Loading...");
