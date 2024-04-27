@@ -21,7 +21,17 @@ export class Load extends Phaser.Scene{
         this.load.image('refreshButton', 'assets/refresh_button.png');
 
         this.load.image('stone', 'assets/stone01.png');
-        this.load.image('bomb', 'assets/bomb.png')
+        this.load.image('grass', 'assets/grass01.png');
+        this.load.image('ice', 'assets/ice.png');
+        this.load.spritesheet('bomb', 'assets/bomb.png', {
+            frameWidth: 80,
+            frameHeight: 80
+        });
+
+        this.load.spritesheet('explode', 'assets/explode.png', {
+            frameWidth: 80,
+            frameHeight: 80
+        });
 
         this.load.image('player1', 'assets/player1.png');
         this.load.spritesheet('player0', 'assets/player0.png', {

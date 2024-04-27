@@ -58,7 +58,7 @@ export class User2 {
                 tIndex = Math.min(Math.floor(step / (totalSteps / 4)), 3); // Limit tIndex to 3 (max of 4 textures)
 
                 this.hero.setTexture("player0", textureIndex + tIndex).setScale(0.33);
-                console.log(textureIndex + tIndex);
+                //console.log(textureIndex + tIndex);
             },
             onComplete: () => {
                 this.inTransit = false;

@@ -2,7 +2,7 @@ import {gameConfig} from "../../config/gameConfig.js";
 
 export class User {
 
-    constructor(username, x, y, rank) {
+    constructor(username, x, y, rank, hero) {
         this.username = username;
         this.rank = rank;
         this.x = x;
@@ -12,6 +12,8 @@ export class User {
         this.alive = true;
         this.transitionX = 0;
         this.transitionY = 0;
+
+        this.hero = hero;
     }
 
     transit(x, y) {
@@ -33,11 +35,8 @@ export class User {
         }, 100);
     }
 
-    draw(graphics, enemy) {
-        if (enemy)
-            graphics.fillStyle(0xff6600, 1.0);
-        else
-            graphics.fillStyle(0x0066ff, 1.0);
+    drawOtherUser(graphics) {
+        graphics.fillStyle(0xff6600, 1.0);
         graphics.fillRect(this.x * this.size + this.transitionX, this.y * this.size + this.transitionY, 40, 40);
     }
 

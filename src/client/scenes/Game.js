@@ -42,7 +42,10 @@ export class Game extends Phaser.Scene {
         socket.on('spawn', this.handleSpawn);
         socket.on('placeBomb', this.handlePlaceBomb);
         socket.on('newUser', this.handleNewUser);
+        socket.on('explode', this.handleExplode);
+        socket.on('move', this.handleMove);
     }
+
 
     update() {
         //this.graphics.clear();
@@ -56,11 +59,9 @@ export class Game extends Phaser.Scene {
             if (keys.get('Space').isDown) this.placeBomb();
         }
 
-        for (const enemyUser of users.values()) {
-            if (user !== enemyUser)
-                enemyUser.draw(this.graphics, true);
-            else
-                enemyUser.draw(this.graphics, false);
+        for (const u of users.values()) {
+            if (user !== u)
+                u.drawOtherUser(this.graphics, true);
         }
         if (endGame) this.endGame(result);
     }
@@ -69,32 +70,50 @@ export class Game extends Phaser.Scene {
         if(user2 != null) return;
 
         console.log("spawn");
+        console.log(data);
+
         gameMap.map = data.map;
+        this.drawMap();
+
+        let otherUserSprite = this.add.sprite(user.x * 40 + 20, user.y * 40 + 20, 'player0', 10).setScale(0.33);
         let u2 = new Map(JSON.parse(data.users));
         for (let [key, value] of u2.entries()) {
-            users.set(key, new User(value.username, value.x, value.y, null));
+            users.set(key, new User(value.username, value.x, value.y, null, otherUserSprite));
         }
 
         user = users.get(socket.id);
 
-        let userSprite = this.add.sprite(user.x * 40 + 20, user.y * 40 + 20, 'player1');
+        let userSprite = this.add.sprite(user.x * 40 + 20, user.y * 40 + 20, 'player0', 10).setScale(0.33);
         user2 = new User2("?", userSprite, "?");
 
         spawned = true;
 
-        gameMap.draw();
+    }
+
+    drawMap() {
+        for (let i = 0; i < gameMap.map.length; i++) {
+            for (let j = 0; j < gameMap.map[0].length; j++) {
+                if (gameMap.map[i][j] === FieldEnum.EMPTY) {
+                    this.add.sprite(j * 40 + 20, i * 40 + 20, 'grass').setScale(0.5);
+                }else if (gameMap.map[i][j] === FieldEnum.STONE) {
+                    this.add.sprite(j * 40 + 20, i * 40 + 20, 'stone');
+                }else if (gameMap.map[i][j] === FieldEnum.BARRICADE) {
+                    this.add.sprite(j * 40 + 20, i * 40 + 20, 'ice').setScale(0.5);
+                } else {
+                    this.graphics.fillStyle(0x000000, 1.0);
+                    this.graphics.fillRect(j * 40, i * 40, 40, 40);
+                }
+            }
+        }
     }
 
     placeBomb() {
         socket.emit('placeBomb');
-
-        this.add.sprite(user.x * 40 + 20, user.y * 40 + 20, 'bomb');
     }
 
     handlePlaceBomb = (pos) => {
-        gameMap.placeBomb(pos.x, pos.y);
-
-        this.add.sprite(pos.x * 40 + 20, pos.y * 40 + 20, 'bomb');
+        if(gameMap.placeBomb(pos.x, pos.y, this))
+            this.add.sprite(pos.x * 40 + 20, pos.y * 40 + 20, 'bomb').setScale(0.33);
     }
 
     handleNewUser = (data) => {
@@ -109,8 +128,6 @@ export class Game extends Phaser.Scene {
             user.transit(x, y);
             socket.emit('move', new Point(x, y));
 
-
-
             user2.transit(x, y, this.tweens);
         }
     }
@@ -119,23 +136,28 @@ export class Game extends Phaser.Scene {
         this.scene.start("EndMenu", {result: result});
     }
 
-}
+    handleExplode = (pos)=> {
+        let detonated = gameMap.detonate(pos.x, pos.y, this);
 
-socket.on('move', function (data) {
-    if (!spawned) return;
-    if (data.id === socket.id) {
-        console.warn("Rollback detected!");
-        user.inTransit = false;
-        user.transitionX = 0;
-        user.transitionY = 0;
+        for(let i = 0; i < detonated.length; i++) {
+            this.add.sprite(detonated[i].x * 40 + 20, detonated[i].y * 40 + 20, 'explode').setScale(0.33);
+        }
     }
 
-    users.get(data.id).transit(data.pos.x, data.pos.y);
-});
+    handleMove = (data) => {
+        if (!spawned) return;
+        if (data.id === socket.id) {
+            console.warn("Rollback detected!");
+            user.inTransit = false;
+            user.transitionX = 0;
+            user.transitionY = 0;
+        }
 
-socket.on('explode', function (pos) {
-    gameMap.detonate(pos.x, pos.y);
-});
+        users.get(data.id).transit(data.pos.x, data.pos.y);
+        users.get(data.id).hero.x = data.pos.x * 40 + 20;
+        users.get(data.id).hero.y = data.pos.y * 40 + 20;
+    }
+}
 
 socket.on('disconnectUser', function (id) {
     if (!spawned) return;
@@ -145,5 +167,6 @@ socket.on('disconnectUser', function (id) {
 socket.on('endGame', function (data) {
     endGame = true;
     result = data;
+    spawned = false;
     socket.disconnect();
 });
