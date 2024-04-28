@@ -22,8 +22,6 @@ export class User2 {
 
         const totalTime = 50; // Adjust for desired speed (milliseconds)
 
-
-
         let textureIndex = 0;
 
         if(x * this.size + this.size / 2 > this.hero.x){ // right
@@ -39,8 +37,6 @@ export class User2 {
             textureIndex = 0;
         }
 
-
-        console.log(textureIndex);
         this.hero.setTexture("player0", textureIndex).setScale(0.33);
 
         let step = 0;
@@ -65,13 +61,4 @@ export class User2 {
             }
         });
     }
-
-    /*draw(graphics, enemy) {
-        if (enemy)
-            graphics.fillStyle(0xff6600, 1.0);
-        else
-            graphics.fillStyle(0x0066ff, 1.0);
-        graphics.fillRect(this.x * this.size + this.transitionX, this.y * this.size + this.transitionY, 40, 40);
-    }*/
-
 }

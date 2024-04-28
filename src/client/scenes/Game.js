@@ -93,12 +93,16 @@ export class Game extends Phaser.Scene {
     drawMap() {
         for (let i = 0; i < gameMap.map.length; i++) {
             for (let j = 0; j < gameMap.map[0].length; j++) {
-                if (gameMap.map[i][j] === FieldEnum.EMPTY) {
-                    this.add.sprite(j * 40 + 20, i * 40 + 20, 'grass').setScale(0.5);
-                }else if (gameMap.map[i][j] === FieldEnum.STONE) {
-                    this.add.sprite(j * 40 + 20, i * 40 + 20, 'stone');
-                }else if (gameMap.map[i][j] === FieldEnum.BARRICADE) {
-                    this.add.sprite(j * 40 + 20, i * 40 + 20, 'ice').setScale(0.5);
+                const field = gameMap.map[i][j];
+                if (field.fieldType === FieldEnum.EMPTY) {
+                    let sp = this.add.sprite(j * 40 + 20, i * 40 + 20, 'grass').setScale(0.5);
+                    field.sp = sp;
+                } else if (field.fieldType === FieldEnum.STONE) {
+                    let sp = this.add.sprite(j * 40 + 20, i * 40 + 20, 'stone');
+                    field.sp = sp;
+                } else if (field.fieldType === FieldEnum.BARRICADE) {
+                    let sp = this.add.sprite(j * 40 + 20, i * 40 + 20, 'ice').setScale(0.5);
+                    field.sp = sp;
                 } else {
                     this.graphics.fillStyle(0x000000, 1.0);
                     this.graphics.fillRect(j * 40, i * 40, 40, 40);
@@ -123,7 +127,7 @@ export class Game extends Phaser.Scene {
     }
 
     move(x, y) {
-        if (!user.inTransit && gameMap.map[y][x] === FieldEnum.EMPTY) {
+        if (!user.inTransit && gameMap.map[y][x].fieldType === FieldEnum.EMPTY) {
 
             user.transit(x, y);
             socket.emit('move', new Point(x, y));
@@ -136,13 +140,37 @@ export class Game extends Phaser.Scene {
         this.scene.start("EndMenu", {result: result});
     }
 
-    handleExplode = (pos)=> {
+    handleExplode = (pos) => {
         let detonated = gameMap.detonate(pos.x, pos.y, this);
 
-        for(let i = 0; i < detonated.length; i++) {
-            this.add.sprite(detonated[i].x * 40 + 20, detonated[i].y * 40 + 20, 'explode').setScale(0.33);
+        console.log(detonated);
+
+        for (let i = 0; i < detonated.length; i++) {
+            let x = detonated[i].x;
+            let y = detonated[i].y;
+
+            // Запазване на координатите
+            let coordinates = { x, y };
+
+            let sprite = this.add
+                .sprite(
+                    detonated[i].x * 40 + 20,
+                    detonated[i].y * 40 + 20,
+                    'explode')
+                .setScale(0.33);
+
+            // Използване на `setTimeout` за забавяне на премахването с 5 секунди
+            setTimeout(() => {
+                sprite.destroy();
+
+                // Задайте текстурата и мащаба на "grass"
+                console.log(y, x);
+                console.log(gameMap.map[y][x]);
+
+                gameMap.map[y][x].sp.setTexture("grass").setScale(0.5);
+            }, 1000);
         }
-    }
+    };
 
     handleMove = (data) => {
         if (!spawned) return;
@@ -154,6 +182,7 @@ export class Game extends Phaser.Scene {
         }
 
         users.get(data.id).transit(data.pos.x, data.pos.y);
+
         users.get(data.id).hero.x = data.pos.x * 40 + 20;
         users.get(data.id).hero.y = data.pos.y * 40 + 20;
     }

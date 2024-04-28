@@ -120,7 +120,7 @@ export class Room {
         if (Math.abs(pos.x - user.x) + Math.abs(pos.y - user.y) > 1) {
             return false;
         }
-        if (this.gameMap.map[pos.y][pos.x] !== FieldEnum.EMPTY) {
+        if (this.gameMap.map[pos.y][pos.x].fieldType !== FieldEnum.EMPTY) {
             return false;
         }
         return true;
