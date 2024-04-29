@@ -4,6 +4,7 @@ import {Point} from "../../api/Point.js";
 import {User} from "../../api/User.js";
 import {User2} from "../../api/User2.js";
 import {socket} from "./MainMenu.js";
+import {Bombs} from "../../api/Bombs.js";
 
 let gameMap,
     users,
@@ -12,6 +13,7 @@ let gameMap,
     keys,
     spawned,
     result,
+    bombs,
     endGame;
 
 export class Game extends Phaser.Scene {
@@ -26,6 +28,7 @@ export class Game extends Phaser.Scene {
         gameMap.game = this;
         users = new Map();
         user = new User();
+        bombs = new Bombs();
 
         endGame = false;
         this.graphics = this.add.graphics();
@@ -125,8 +128,21 @@ export class Game extends Phaser.Scene {
     }
 
     handlePlaceBomb = (pos) => {
-        if(gameMap.placeBomb(pos.x, pos.y, this))
-            this.add.sprite(pos.x * 40 + 20, pos.y * 40 + 20, 'bomb').setScale(0.33);
+        if(gameMap.placeBomb(pos.x, pos.y, this)) {
+            let sprite = this.add.sprite(pos.x * 40 + 20, pos.y * 40 + 20, 'bomb').setScale(0.33);
+
+            let bombX = pos.x;
+            let bombY = pos.y;
+            bombs.addBomb(bombX, bombY, sprite);
+
+            console.log(bombs.bombs);
+
+            setTimeout(() => {
+                bombs.removeBomb(bombX, bombY);
+                //sprite.destroy();
+
+            }, 990);
+        }
     }
 
     handleNewUser = (data) => {
@@ -150,34 +166,35 @@ export class Game extends Phaser.Scene {
     }
 
     handleExplode = (pos) => {
-        let detonated = gameMap.detonate(pos.x, pos.y, this);
+        let detonated = gameMap.detonate(pos.x, pos.y);
 
-        console.log(detonated);
+        bombs.removeBombs(detonated);
 
         for (let i = 0; i < detonated.length; i++) {
             let x = detonated[i].x;
             let y = detonated[i].y;
 
-            // Запазване на координатите
-            let coordinates = { x, y };
-
             let sprite = this.add
                 .sprite(
                     detonated[i].x * 40 + 20,
                     detonated[i].y * 40 + 20,
-                    'explode')
+                    'explode', 0)
                 .setScale(0.33);
 
-            // Използване на `setTimeout` за забавяне на премахването с 5 секунди
-            setTimeout(() => {
-                sprite.destroy();
+            let textureIndex = 0; // индекс на текстурата
+            let totalTextures = 6;
 
-                // Задайте текстурата и мащаба на "grass"
-                console.log(y, x);
-                console.log(gameMap.map[y][x]);
-
-                gameMap.map[y][x].sp.setTexture("grass").setScale(0.5);
-            }, 200);
+            // Използване на `setInterval` за забавяне на премахването с 1 секунда
+            let interval = setInterval(() => {
+                if (textureIndex < totalTextures) {
+                    sprite.setTexture("explode", textureIndex).setScale(0.33);
+                    textureIndex++; // увеличаване на индекса за следващата текстура
+                } else {
+                    clearInterval(interval); // спиране на интервала след последната текстура
+                    sprite.destroy();
+                    gameMap.map[y][x].sp.setTexture("grass").setScale(0.5);
+                }
+            }, 14); // интервалът е на всяка секунда
         }
     };
 

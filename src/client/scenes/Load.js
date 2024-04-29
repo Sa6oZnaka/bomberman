@@ -29,8 +29,8 @@ export class Load extends Phaser.Scene{
         });
 
         this.load.spritesheet('explode', 'assets/explode.png', {
-            frameWidth: 80,
-            frameHeight: 80
+            frameWidth: 125,
+            frameHeight: 125
         });
 
         this.load.image('player1', 'assets/player1.png');
