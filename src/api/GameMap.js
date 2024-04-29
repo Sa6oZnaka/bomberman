@@ -60,59 +60,83 @@ export class GameMap {
     detonate(x, y, scene, r = 5) {
         let detonatedFields = [];
         this.explodeField(x, y, scene);
-        for (let i = 1; i < r + 1; i++) {
-            if (this.map[y][x + i].fieldType === FieldEnum.BOMB) {
-                detonatedFields.push(new Point(x + i, y, scene));
-                detonatedFields.push(...this.detonate(x + i, y, scene));
+        for (let i = x; i < x + r; i++) { // iterate forwards for right side
+            if (this.map[y][i].fieldType === FieldEnum.BOMB) {
+                detonatedFields.push(new Point(i, y, scene));
+                detonatedFields.push(...this.detonate(i, y, scene));
             }
-            if (this.canExplode2(x + i, y)) {
-                detonatedFields.push(new Point(x + i, y, scene));
-            }
-            if (this.canExplode(x + i, y)) {
+            if (this.map[y][i].fieldType === FieldEnum.BARRICADE) {
+                detonatedFields.push(new Point(i, y));
+                this.explodeField(i, y, scene);
                 break;
             }
-        }
 
-        for (let i = 1; i < r + 1; i--) { // iterate backwards for left side
-            if (this.map[y][x - i].fieldType === FieldEnum.BOMB) {
-                detonatedFields.push(new Point(x - i, y, scene));
-                detonatedFields.push(...this.detonate(x - i, y, scene));
-            }
-            if (this.canExplode2(x - i, y)) {
-                detonatedFields.push(new Point(x - i, y, scene));
-            }
-            if (this.canExplode(x - i, y)) {
+            if (!this.canContinue(i, y)) {
                 break;
             }
+
+            detonatedFields.push(new Point(i, y));
+            this.explodeField(i, y, scene);
         }
 
-        for (let j = 1; j < r + 1; j++) { // iterate downwards for bottom side
-            if (this.map[y + j][x].fieldType === FieldEnum.BOMB) {
-                detonatedFields.push(new Point(x, y + j, scene));
-                detonatedFields.push(...this.detonate(x, y + j, scene));
+
+        for (let i = x; i > x - r; i--) { // iterate backwards for left side
+            if (this.map[y][i].fieldType === FieldEnum.BOMB) {
+                detonatedFields.push(new Point(i, y));
+                detonatedFields.push(...this.detonate(i, y, scene));
             }
-            if (this.canExplode2(x, y + j)) {
-                detonatedFields.push(new Point(x, y + j, scene));
-            }
-            if (this.canExplode(x, y + j)) {
+            if (this.map[y][i].fieldType === FieldEnum.BARRICADE) {
+                detonatedFields.push(new Point(i, y));
+                this.explodeField(i, y, scene);
                 break;
             }
-        }
 
-        for (let j = 1; j < r + 1; j--) { // iterate upwards for top side
-            if (this.map[y - j][x].fieldType === FieldEnum.BOMB) {
-                detonatedFields.push(new Point(x, y - j, scene));
-                detonatedFields.push(...this.detonate(x, y - j, scene));
-            }
-            if (this.canExplode2(x, y - j)) {
-                detonatedFields.push(new Point(x, y - j, scene));
-            }
-            if (this.canExplode(x, y - j)) {
+            if (!this.canContinue(i, y)) {
                 break;
             }
+
+            detonatedFields.push(new Point(i, y));
+            this.explodeField(i, y, scene);
         }
 
-        console.log(detonatedFields);
+        for (let j = y; j < y + r; j++) { // iterate downwards for bottom side
+            if (this.map[j][x].fieldType === FieldEnum.BOMB) {
+                detonatedFields.push(new Point(x, j));
+                detonatedFields.push(...this.detonate(x, j, scene));
+            }
+            if (this.map[j][x].fieldType === FieldEnum.BARRICADE) {
+                detonatedFields.push(new Point(x, j));
+                this.explodeField(x, j, scene);
+                break;
+            }
+
+            if (!this.canContinue(x, j)) {
+                break;
+            }
+
+            detonatedFields.push(new Point(x, j));
+            this.explodeField(x, j, scene);
+        }
+
+        for (let j = y; j > y - r; j--) { // iterate upwards for top side
+            if (this.map[j][x].fieldType === FieldEnum.BOMB) {
+                detonatedFields.push(new Point(x, j));
+                detonatedFields.push(...this.detonate(x, j, scene));
+            }
+            if (this.map[j][x].fieldType === FieldEnum.BARRICADE) {
+                detonatedFields.push(new Point(x, j));
+                this.explodeField(x, j, scene);
+                break;
+            }
+
+            if (!this.canContinue(x, j)) {
+                break;
+            }
+
+            detonatedFields.push(new Point(x, j));
+            this.explodeField(x, j, scene);
+        }
+
         return detonatedFields;
     }
 
@@ -156,6 +180,18 @@ export class GameMap {
         }
         this.explodeField(x, y);
         return false;
+    }
+
+    canContinue(x, y) {
+        if (this.map[y][x].fieldType === FieldEnum.BOMB) {
+            return false;
+        }
+        if (this.map[y][x].fieldType === FieldEnum.STONE)
+            return false;
+        if (this.map[y][x].fieldType === FieldEnum.BARRICADE) {
+            return false;
+        }
+        return true;
     }
 
     clearExplosion(x, y) {

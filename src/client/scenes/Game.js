@@ -75,7 +75,12 @@ export class Game extends Phaser.Scene {
         gameMap.map = data.map;
         this.drawMap();
 
-        let otherUserSprite = this.add.sprite(user.x * 40 + 20, user.y * 40 + 20, 'player0', 10).setScale(0.33);
+        let otherUserSprite = this.add
+            .sprite(
+                user.x * 40 + 20,
+                user.y * 40 + 20,
+                'player0', 10)
+            .setScale(0.33);
         let u2 = new Map(JSON.parse(data.users));
         for (let [key, value] of u2.entries()) {
             users.set(key, new User(value.username, value.x, value.y, null, otherUserSprite));
@@ -95,13 +100,17 @@ export class Game extends Phaser.Scene {
             for (let j = 0; j < gameMap.map[0].length; j++) {
                 const field = gameMap.map[i][j];
                 if (field.fieldType === FieldEnum.EMPTY) {
-                    let sp = this.add.sprite(j * 40 + 20, i * 40 + 20, 'grass').setScale(0.5);
+                    let sp = this.add
+                        .sprite(j * 40 + 20, i * 40 + 20, 'grass')
+                        .setScale(0.5);
                     field.sp = sp;
                 } else if (field.fieldType === FieldEnum.STONE) {
                     let sp = this.add.sprite(j * 40 + 20, i * 40 + 20, 'stone');
                     field.sp = sp;
                 } else if (field.fieldType === FieldEnum.BARRICADE) {
-                    let sp = this.add.sprite(j * 40 + 20, i * 40 + 20, 'ice').setScale(0.5);
+                    let sp = this.add
+                        .sprite(j * 40 + 20, i * 40 + 20, 'ice')
+                        .setScale(0.5);
                     field.sp = sp;
                 } else {
                     this.graphics.fillStyle(0x000000, 1.0);
@@ -168,7 +177,7 @@ export class Game extends Phaser.Scene {
                 console.log(gameMap.map[y][x]);
 
                 gameMap.map[y][x].sp.setTexture("grass").setScale(0.5);
-            }, 1000);
+            }, 200);
         }
     };
 
