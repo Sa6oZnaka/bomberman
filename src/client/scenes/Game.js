@@ -94,12 +94,8 @@ export class Game extends Phaser.Scene {
                     value.y));
         }
 
-        let test = users.get(socket.id);
-        // TODO use user2
-        user = new User("nz", test.x, test.y);
-
-        let userSprite = this.add.sprite(user.x * 40 + 20, user.y * 40 + 20, 'player0', 10).setScale(0.33);
-        user2 = new User2("?", userSprite, user.x * 40 + 20, user.y * 40 + 20);
+        user2 = users.get(socket.id);
+        user = new User("nz", user2.x, user2.y);
 
         spawned = true;
 
