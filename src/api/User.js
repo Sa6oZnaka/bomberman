@@ -2,7 +2,7 @@ import {gameConfig} from "../../config/gameConfig.js";
 
 export class User {
 
-    constructor(username, x, y, rank, hero) {
+    constructor(username, x, y, rank) {
         this.username = username;
         this.rank = rank;
         this.x = x;
@@ -12,8 +12,6 @@ export class User {
         this.alive = true;
         this.transitionX = 0;
         this.transitionY = 0;
-
-        this.hero = hero;
     }
 
     transit(x, y) {

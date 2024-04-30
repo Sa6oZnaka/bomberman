@@ -2,11 +2,13 @@ import {gameConfig} from "../../config/gameConfig.js";
 
 export class User2 {
 
-    constructor(username, hero, rank) {
+    constructor(username, hero, x, y) {
         this.username = username;
-        this.rank = rank;
-        //this.x = x;
-        //this.y = y;
+
+        // TODO: Not in use
+        this.x = x;
+        this.y = y;
+
         this.size = gameConfig.GRID_CELL_SIZE;
         this.inTransit = false;
         this.alive = true;
@@ -14,6 +16,8 @@ export class User2 {
         this.transitionY = 0;
 
         this.hero = hero;
+        //this.hero.x = x;
+        //this.hero.y = y;
     }
 
     transit(x, y, tw) {

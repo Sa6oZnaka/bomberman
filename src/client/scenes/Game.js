@@ -62,9 +62,10 @@ export class Game extends Phaser.Scene {
             if (keys.get('Space').isDown) this.placeBomb();
         }
 
+        // TODO: Draw other
         for (const u of users.values()) {
-            if (user !== u)
-                u.drawOtherUser(this.graphics, true);
+            //if (user !== u)
+                //u.drawOtherUser(this.graphics, true);
         }
         if (endGame) this.endGame(result);
     }
@@ -72,27 +73,33 @@ export class Game extends Phaser.Scene {
     handleSpawn = (data) => {
         if(user2 != null) return;
 
-        console.log("spawn");
-        console.log(data);
-
         gameMap.map = data.map;
         this.drawMap();
 
-        let otherUserSprite = this.add
-            .sprite(
-                user.x * 40 + 20,
-                user.y * 40 + 20,
-                'player0', 10)
-            .setScale(0.33);
         let u2 = new Map(JSON.parse(data.users));
         for (let [key, value] of u2.entries()) {
-            users.set(key, new User(value.username, value.x, value.y, null, otherUserSprite));
+            let otherUserSprite = this.add
+                .sprite(
+                    value.x * 40 + 20,
+                    value.y * 40 + 20,
+                    'player0', 10)
+                .setScale(0.33);
+
+            users.set(
+                key,
+                new User2(
+                    value.username,
+                    otherUserSprite,
+                    value.x,
+                    value.y));
         }
 
-        user = users.get(socket.id);
+        let test = users.get(socket.id);
+        // TODO use user2
+        user = new User("nz", test.x, test.y);
 
         let userSprite = this.add.sprite(user.x * 40 + 20, user.y * 40 + 20, 'player0', 10).setScale(0.33);
-        user2 = new User2("?", userSprite, "?");
+        user2 = new User2("?", userSprite, user.x * 40 + 20, user.y * 40 + 20);
 
         spawned = true;
 
@@ -147,7 +154,11 @@ export class Game extends Phaser.Scene {
 
     handleNewUser = (data) => {
         if (!spawned) return;
-        users.set(data.id, new User(data.username, data.user.x, data.user.y, null));
+
+        let userSprite = this.add
+            .sprite(data.user.x * 40 + 20, data.user.y * 40 + 20, 'player0', 10)
+            .setScale(0.33);
+        users.set(data.id, new User2(data.username, userSprite, data.user.x, data.user.y));
         gameMap.clearForPlayer(data.user.x, data.user.y);
     }
 
@@ -207,10 +218,10 @@ export class Game extends Phaser.Scene {
             user.transitionY = 0;
         }
 
-        users.get(data.id).transit(data.pos.x, data.pos.y);
+        users.get(data.id).transit(data.pos.x, data.pos.y, this.tweens);
 
-        users.get(data.id).hero.x = data.pos.x * 40 + 20;
-        users.get(data.id).hero.y = data.pos.y * 40 + 20;
+        //users.get(data.id).hero.x = data.pos.x * 40 + 20;
+        //users.get(data.id).hero.y = data.pos.y * 40 + 20;
     }
 }
 
