@@ -5,7 +5,6 @@ export class GameMap {
 
     constructor(x, y) {
         this.map = GameMap.init(x, y);
-        //this.game = null;
     }
 
     static init(x, y) {

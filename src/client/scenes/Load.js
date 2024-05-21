@@ -4,8 +4,8 @@ export class Load extends Phaser.Scene{
     }
     preload(){
         this.load.spritesheet('button', 'assets/button_sprite_sheet.png', {
-            frameWidth: 193,
-            frameHeight: 66
+            frameWidth: 215,
+            frameHeight: 70
         });
         this.load.spritesheet('smallButton', 'assets/small_button_sprite_sheet.png', {
             frameWidth: 28,
@@ -19,8 +19,16 @@ export class Load extends Phaser.Scene{
         this.load.image('backButton', 'assets/back_button.png');
         this.load.image('newButton', 'assets/new_message_button.png');
         this.load.image('refreshButton', 'assets/refresh_button.png');
+        this.load.image('leaderboard', 'assets/leaderboard.png');
+        this.load.image('side', 'assets/side.png');
 
         this.load.image('stone', 'assets/stone01.png');
+        this.load.image('logo', 'assets/logo.png');
+        this.load.image('header', 'assets/header.png');
+        this.load.image('menu2', 'assets/menu2.png');
+        this.load.image('competitive', 'assets/competitive.png');
+        this.load.image('casual', 'assets/casual.png');
+
         this.load.image('grass', 'assets/grass01.png');
         this.load.image('ice', 'assets/ice.png');
         this.load.spritesheet('bomb', 'assets/bomb.png', {

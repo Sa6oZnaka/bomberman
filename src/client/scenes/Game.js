@@ -5,13 +5,14 @@ import {User} from "../../api/User.js";
 import {User2} from "../../api/User2.js";
 import {socket} from "./MainMenu.js";
 import {Bombs} from "../../api/Bombs.js";
+import {gameConfig} from "../../../config/gameConfig.js";
 
 let gameMap,
     users,
     user,
     user2,
     keys,
-    spawned,
+    inGame,
     result,
     bombs,
     endGame;
@@ -23,9 +24,8 @@ export class Game extends Phaser.Scene {
     }
 
     create() {
-        spawned = false;
+        inGame = false;
         gameMap = new GameMap();
-        gameMap.game = this;
         users = new Map();
         user = new User();
         bombs = new Bombs();
@@ -51,10 +51,7 @@ export class Game extends Phaser.Scene {
 
 
     update() {
-        //this.graphics.clear();
-        //this.draw(this.graphics);
-
-        if (spawned) {
+        if (inGame) {
             if (keys.get('A').isDown) this.move(user.x - 1, user.y);
             if (keys.get('S').isDown) this.move(user.x, user.y + 1);
             if (keys.get('D').isDown) this.move(user.x + 1, user.y);
@@ -62,17 +59,15 @@ export class Game extends Phaser.Scene {
             if (keys.get('Space').isDown) this.placeBomb();
         }
 
-        // TODO: Draw other
-        for (const u of users.values()) {
-            //if (user !== u)
-                //u.drawOtherUser(this.graphics, true);
-        }
         if (endGame) this.endGame(result);
     }
 
     handleSpawn = (data) => {
-        if(user2 != null) return;
 
+        console.log("Spawn called!");
+        console.log(data);
+
+        gameMap = new GameMap();
         gameMap.map = data.map;
         this.drawMap();
 
@@ -80,8 +75,8 @@ export class Game extends Phaser.Scene {
         for (let [key, value] of u2.entries()) {
             let otherUserSprite = this.add
                 .sprite(
-                    value.x * 40 + 20,
-                    value.y * 40 + 20,
+                    value.x * gameConfig.GRID_CELL_SIZE + gameConfig.GRID_CELL_SIZE/2,
+                    value.y * gameConfig.GRID_CELL_SIZE + gameConfig.GRID_CELL_SIZE/2,
                     'player0', 10)
                 .setScale(0.33);
 
@@ -97,11 +92,15 @@ export class Game extends Phaser.Scene {
         user2 = users.get(socket.id);
         user = new User("nz", user2.x, user2.y);
 
-        spawned = true;
+        inGame = true;
 
     }
 
     drawMap() {
+        console.log("draw map CALLED");
+        console.log(gameMap.map.length);
+        console.log(gameMap.map[0].length);
+
         for (let i = 0; i < gameMap.map.length; i++) {
             for (let j = 0; j < gameMap.map[0].length; j++) {
                 const field = gameMap.map[i][j];
@@ -149,7 +148,7 @@ export class Game extends Phaser.Scene {
     }
 
     handleNewUser = (data) => {
-        if (!spawned) return;
+        if (!inGame) return;
 
         let userSprite = this.add
             .sprite(data.user.x * 40 + 20, data.user.y * 40 + 20, 'player0', 10)
@@ -193,42 +192,52 @@ export class Game extends Phaser.Scene {
 
             // Използване на `setInterval` за забавяне на премахването с 1 секунда
             let interval = setInterval(() => {
-                if (textureIndex < totalTextures) {
-                    sprite.setTexture("explode", textureIndex).setScale(0.33);
-                    textureIndex++; // увеличаване на индекса за следващата текстура
-                } else {
+                // if game ends (explosion kills player)
+                if (endGame || !inGame) {
+                    clearInterval(interval);
+                    return;
+                }
+
+                if (textureIndex >= totalTextures || !sprite.texture) {
                     clearInterval(interval); // спиране на интервала след последната текстура
                     sprite.destroy();
                     gameMap.map[y][x].sp.setTexture("grass").setScale(0.5);
+                    return;
                 }
-            }, 14); // интервалът е на всяка секунда
+
+                sprite.setTexture("explode", textureIndex).setScale(0.33);
+                textureIndex++; // увеличаване на индекса за следващата текстура
+            }, 12); // интервалът е на всяка секунда
         }
     };
 
     handleMove = (data) => {
-        if (!spawned) return;
+        if (!inGame) return;
         if (data.id === socket.id) {
             console.warn("Rollback detected!");
             user.inTransit = false;
             user.transitionX = 0;
             user.transitionY = 0;
+
+            user2.hero.x = data.pos.x * 40 + 20;
+            user2.hero.y = data.pos.y * 40 + 20;
+            user2.inTransit = false;
         }
 
         users.get(data.id).transit(data.pos.x, data.pos.y, this.tweens);
-
-        //users.get(data.id).hero.x = data.pos.x * 40 + 20;
-        //users.get(data.id).hero.y = data.pos.y * 40 + 20;
     }
 }
 
 socket.on('disconnectUser', function (id) {
-    if (!spawned) return;
+    if (!inGame) return;
     users.delete(id);
 });
 
 socket.on('endGame', function (data) {
+    bombs = null;
     endGame = true;
     result = data;
-    spawned = false;
+    inGame = false;
+
     socket.disconnect();
 });

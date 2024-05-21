@@ -12,12 +12,8 @@ export class User2 {
         this.size = gameConfig.GRID_CELL_SIZE;
         this.inTransit = false;
         this.alive = true;
-        this.transitionX = 0;
-        this.transitionY = 0;
 
         this.hero = hero;
-        //this.hero.x = x;
-        //this.hero.y = y;
     }
 
     transit(x, y, tw) {
@@ -25,7 +21,6 @@ export class User2 {
         this.inTransit = true;
 
         const totalTime = 50; // Adjust for desired speed (milliseconds)
-
         let textureIndex = 0;
 
         if(x * this.size + this.size / 2 > this.hero.x){ // right
