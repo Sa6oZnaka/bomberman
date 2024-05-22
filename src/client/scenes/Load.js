@@ -28,6 +28,14 @@ export class Load extends Phaser.Scene{
         this.load.image('menu2', 'assets/menu2.png');
         this.load.image('competitive', 'assets/competitive.png');
         this.load.image('casual', 'assets/casual.png');
+        this.load.spritesheet('button1', 'assets/button1.png', {
+            frameWidth: 175,
+            frameHeight: 71
+        });
+        this.load.spritesheet('button2', 'assets/button2.png', {
+            frameWidth: 77,
+            frameHeight: 71
+        });
 
         this.load.image('grass', 'assets/grass01.png');
         this.load.image('ice', 'assets/ice.png');
