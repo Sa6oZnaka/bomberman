@@ -28,7 +28,7 @@ a{
     border-radius:6px;
     margin: 0 auto 0 auto;
     padding:0px 0px 70px 0px;
-    border: #2980b9 4px solid;
+    border: #294bb9 4px solid;
 }
 
 .username{
@@ -87,12 +87,12 @@ a{
 }
 #btn2{
     float:left;
-    background:#3498db;
+    background:#294bb9;
     width:125px;  padding-top:5px;
     padding-bottom:5px;
     color:white;
     border-radius:4px;
-    border: #2980b9 1px solid;
+    border: #294bb9 1px solid;
 
     margin-top:30px;
     margin-bottom:20px;
@@ -102,5 +102,5 @@ a{
 }
 
 #btn2:hover{
-    background:#3594D2;
+    background: #002c75;
 }

@@ -37,8 +37,6 @@ export class MainMenu extends Phaser.Scene {
         //this.graphics.fillRect(this.seperatorX, 0, this.scale.width, 150);
 
 
-
-
         this.graphics.fillStyle(0x111330, 1.0);
         this.graphics.fillRect(0, 0, this.scale.width, this.scale.height);
 
@@ -51,9 +49,21 @@ export class MainMenu extends Phaser.Scene {
 
         this.add.sprite(260, 500, 'menu2');
 
-        this.add.text(180, 319, 'Leaderboard', {fontFamily: '"Snap ITC"', color: '#EAAE33'});
+        this.add.text(180, 319, 'Leaderboard', {
+            fontFamily: '"Snap ITC"',
+            color: '#EAAE33',
+            fontStyle: 'bold',
+            stroke: '#000000',
+            strokeThickness: 2
+        });
 
-        this.add.text(180 + size * 3, 319, 'Friends', {fontFamily: '"Snap ITC"', color: '#EAAE33'});
+        this.add.text(180 + size * 3, 319, 'Friends', {
+            fontFamily: '"Snap ITC"',
+            color: '#EAAE33',
+            fontStyle: 'bold',
+            stroke: '#000000',
+            strokeThickness: 2
+        });
 
         this.add.sprite(260 + size * 2, 482, 'competitive');
         this.add.sprite(260 + size, 482, 'casual');
@@ -69,8 +79,18 @@ export class MainMenu extends Phaser.Scene {
             this.searchGame(RoomEnum.CASUAL, this.username, this.rank);
         });
 
-        this.add.text(181 + size * 2, this.seperatorY2 - 45, 'Play Competitive', {fontFamily: '"Snap ITC"'});
-        this.add.text(205 + size, this.seperatorY2 - 45, 'Play Casual', {fontFamily: '"Snap ITC"'});
+        this.add.text(181 + size * 2, this.seperatorY2 - 45, 'Play Competitive', {
+            fontFamily: '"Snap ITC"',
+            fontStyle: 'bold',
+            stroke: '#000000',
+            strokeThickness: 2
+        });
+        this.add.text(205 + size, this.seperatorY2 - 45, 'Play Casual', {
+            fontFamily: '"Snap ITC"',
+            fontStyle: 'bold',
+            stroke: '#000000',
+            strokeThickness: 2
+        });
         //this.addButton(this.seperatorX - 120, this.seperatorY2 + 40, () => { // Replays button
         //    this.scene.start("UserReplays", this.username);
         //});
@@ -170,17 +190,54 @@ export class MainMenu extends Phaser.Scene {
 
                 let margin = 17;
                 this.userStats = new UserStats(data.level, this.rank, data.wins);
-                this.add.text(this.seperatorX + margin, 20, 'Username : ' + this.username, {fontFamily: '"Roboto Condensed"'});
-                this.add.text(this.seperatorX + margin, 36, 'Wins: ' + data.wins, {fontFamily: '"Roboto Condensed"'});
-                this.graphics.fillStyle(0x2A2B2D, 1.0);
-                this.graphics.fillRect(this.seperatorX + margin, 60, this.scale.width - this.seperatorX - margin * 2, 20);
-                this.graphics.fillStyle(0x00FFFF, 1.0);
-                // 00FFFF
-                //                 // #1B1464
-                this.graphics.fillRect(this.seperatorX + margin, 60, this.userStats.getNextLevelProgress() * (this.scale.width - this.seperatorX - margin * 2), 20);
-                this.add.text(this.seperatorX + margin, 60, 'Level : ' + this.userStats.getLevel(), {fontFamily: '"Roboto Condensed"'});
-                this.add.sprite(this.seperatorX + margin + 50, 110, "ranks", this.userStats.getRankId()).setScale(0.5);
-                this.add.text(this.seperatorX + margin, 134, 'Rank: ' + this.userStats.getRank(), {fontFamily: '"Roboto Condensed"'});
+                this.add.text(770, 115, 'Username : ' + this.username, {
+                    fontFamily: '"Roboto Condensed"',
+                    fontStyle: 'bold',
+                    stroke: '#000000',
+                    strokeThickness: 2
+                });
+                this.add.sprite(737, 490, 'cup');
+                this.add.text(750, 480, data.wins, {
+                    fontFamily: '"Roboto Condensed"',
+                        fontStyle: 'bold',
+                        stroke: '#000000',
+                        strokeThickness: 2
+                });
+                /*this.add.text(800, 60, 'Rank: ' + this.userStats.getRank(), {
+                    fontFamily: '"Roboto Condensed"',
+                    fontStyle: 'bold',
+                    stroke: '#000000',
+                    strokeThickness: 2
+                });*/
+
+                let userLevelProgress = this.userStats.getNextLevelProgress();
+
+                const x = 154;
+                const y = 720;
+                const maxWidth = this.scale.width - x * 2;
+                const width = userLevelProgress * maxWidth;
+                const height = 20;
+                const radius = 10;
+                const alpha = 1.0;
+
+                this.drawRoundedRect(x - 2, y - 2, maxWidth + 4, height + 4, radius, 0x008FE2, alpha);
+                this.drawRoundedRect(x, y, maxWidth, height, radius, 0x002C46, alpha);
+                if(userLevelProgress > 0.02) {
+                    this.drawRoundedRect(x, y, width, height, radius, 0xFD0142, alpha);
+                }
+
+                this.add.text(maxWidth / 2 + x - 20, y,
+                    'Level : ' + (this.userStats.getLevel() + 1),
+                    {
+                        fontFamily: '"Roboto Condensed"',
+                        fontStyle: 'bold',
+                        stroke: '#000000',
+                        strokeThickness: 2
+                    });
+
+
+                this.add.sprite(694, 460, "ranks", this.userStats.getRankId()).setScale(0.5);
+
 
                 this.getLeaderBoard();
             }
@@ -218,7 +275,11 @@ export class MainMenu extends Phaser.Scene {
                     this.drawRoundedRect(x, y, width, height, radius, color, alpha);
 
                     //this.add.text(18, 174 + i * sizeY, '#' + (i + 1), {fontFamily: '"Roboto Condensed"'});
-                    this.add.text(178, 352 + i * sizeY, (i + 1) + ". " + data[i].username, {fontFamily: '"Roboto Condensed"'});
+                    this.add.text(178, 352 + i * sizeY, (i + 1) + ". " + data[i].username, {
+                        fontFamily: '"Roboto Condensed"',
+                        stroke: '#000000',
+                        strokeThickness: 2
+                    });
                     //this.add.text(this.seperatorX - 170, 174 + i * sizeY, 'Rank : ', {fontFamily: '"Roboto Condensed"'});
                     //this.add.sprite(this.seperatorX - 65, 174 + i * sizeY, "ranks", UserStats.getRankByPoints(data[i].rank_points)).setScale(0.5);
                 }
@@ -254,7 +315,7 @@ export class MainMenu extends Phaser.Scene {
                         });
                         this.removeFriendButton(1000 - 20, 362 + sizeY * i, data[i].username);
                         //this.blockUser(1000 - 20, 360 + 30 * i, data[i].username);
-                        this.playWithUser(1000 - 20 * 3, 362 + sizeY * i, data[i].username);
+                        //this.playWithUser(1000 - 20 * 3, 362 + sizeY * i, data[i].username);
                         backgroundColor = 0x008000;
 
                         //color = "#08ff00";
@@ -270,10 +331,14 @@ export class MainMenu extends Phaser.Scene {
                     const radius = 10;
                     const alpha = 1.0;
 
-                    this.drawRoundedRect(x, y, width, height, radius, backgroundColor, alpha);
+                    this.drawRoundedRect(x, y, width, height, radius, backgroundColor, alpha, 0x000000, 2);
 
 
-                    this.add.text(820, 352 + i * sizeY, data[i].username + "goshoo", {fontFamily: '"Roboto Condensed"', color: color});
+                    this.add.text(820, 352 + i * sizeY, data[i].username, {
+                        fontFamily: '"Roboto Condensed"',
+                        stroke: '#000000',
+                        strokeThickness: 2, color: color
+                    });
 
                     //console.log(data[i].username);
                 }
@@ -282,8 +347,9 @@ export class MainMenu extends Phaser.Scene {
         }
     }
 
-    drawRoundedRect( x, y, width, height, radius, color, alpha) {
-        this.graphics.fillStyle(color, alpha); // Set the fill color and transparency
+    drawRoundedRect(x, y, width, height, radius, fillColor, fillAlpha, strokeColor, strokeThickness) {
+        this.graphics.lineStyle(strokeThickness, strokeColor); // Outline color is black
+        this.graphics.fillStyle(fillColor, fillAlpha); // Set the fill color and transparency
         this.graphics.beginPath();
         this.graphics.moveTo(x + radius, y);
         this.graphics.lineTo(x + width - radius, y);
@@ -296,7 +362,9 @@ export class MainMenu extends Phaser.Scene {
         this.graphics.arc(x + radius, y + radius, radius, Phaser.Math.DegToRad(180), Phaser.Math.DegToRad(270));
         this.graphics.closePath();
         this.graphics.fillPath();
+        this.graphics.strokePath(); // Draw the outline
     }
+
 
     addAcceptButton(x, y, data){
         this.addSmallButton(x, y, 0, function () {

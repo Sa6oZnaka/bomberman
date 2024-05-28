@@ -11,9 +11,9 @@ export class Load extends Phaser.Scene{
             frameWidth: 28,
             frameHeight: 28
         });
-        this.load.spritesheet('ranks', 'assets/ranks_sprite_sheet.png', {
-            frameWidth: 200,
-            frameHeight: 90
+        this.load.spritesheet('ranks', 'assets/ranks.png', {
+            frameWidth: 150,
+            frameHeight: 148
         });
         this.load.image('watchButton', 'assets/watch_button.png');
         this.load.image('backButton', 'assets/back_button.png');
@@ -38,6 +38,7 @@ export class Load extends Phaser.Scene{
         });
 
         this.load.image('grass', 'assets/grass01.png');
+        this.load.image('cup', 'assets/cup.png');
         this.load.image('ice', 'assets/ice.png');
         this.load.spritesheet('bomb', 'assets/bomb.png', {
             frameWidth: 80,
