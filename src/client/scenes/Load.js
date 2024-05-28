@@ -39,6 +39,7 @@ export class Load extends Phaser.Scene{
 
         this.load.image('grass', 'assets/grass01.png');
         this.load.image('cup', 'assets/cup.png');
+        this.load.image('endgame', 'assets/endgame.png');
         this.load.image('ice', 'assets/ice.png');
         this.load.spritesheet('bomb', 'assets/bomb.png', {
             frameWidth: 80,

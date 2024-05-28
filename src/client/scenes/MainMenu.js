@@ -31,15 +31,9 @@ export class MainMenu extends Phaser.Scene {
         this.graphics = this.add.graphics();
         this.graphics.fillStyle(0x1B1464, 1.0);
         this.graphics.fillRect(0, this.seperatorY2, this.seperatorX, this.scale.height);
-        //this.graphics.fillStyle(0x1B1464, 1.0);
-        //this.graphics.fillRect(this.seperatorX, this.seperatorY1, this.scale.width, this.scale.height);
-        //this.graphics.fillStyle(0x2DA8D8, 1.0);
-        //this.graphics.fillRect(this.seperatorX, 0, this.scale.width, 150);
-
 
         this.graphics.fillStyle(0x111330, 1.0);
         this.graphics.fillRect(0, 0, this.scale.width, this.scale.height);
-
 
         let size = 215;
 
@@ -68,10 +62,6 @@ export class MainMenu extends Phaser.Scene {
         this.add.sprite(260 + size * 2, 482, 'competitive');
         this.add.sprite(260 + size, 482, 'casual');
 
-        //this.add.text(this.seperatorX - 160, this.seperatorY2 + 30, 'Replays', {fontFamily: '"Snap ITC"'});
-        //this.add.text(this.seperatorX + 10, this.seperatorY1, 'Friend List', {fontFamily: '"Roboto Condensed"'});
-        //this.add.text(12 , this.seperatorY1 - 20, 'Leaderboard', {fontFamily: '"Roboto Condensed"'});
-
         this.addButton(260 + size * 2, this.seperatorY2 - 33, () => { // Casual button
             this.searchGame(RoomEnum.COMPETITIVE, this.username);
         });
@@ -91,18 +81,13 @@ export class MainMenu extends Phaser.Scene {
             stroke: '#000000',
             strokeThickness: 2
         });
-        //this.addButton(this.seperatorX - 120, this.seperatorY2 + 40, () => { // Replays button
-        //    this.scene.start("UserReplays", this.username);
-        //});
 
         this.addAddButton(980, 330, () => { // Add friend button
             http.open('POST', '/addFriend', true);
             http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             http.send("data=" + JSON.stringify(prompt("Friend's username")));
-            //this.getFriends();
         });
 
-        //this.add.text(this.seperatorX + 90, this.seperatorY2 + 20, 'Add friend', {fontFamily: '"Snap ITC"'});
 
         this.graphics = this.add.graphics();
         this.getUser();
@@ -203,12 +188,6 @@ export class MainMenu extends Phaser.Scene {
                         stroke: '#000000',
                         strokeThickness: 2
                 });
-                /*this.add.text(800, 60, 'Rank: ' + this.userStats.getRank(), {
-                    fontFamily: '"Roboto Condensed"',
-                    fontStyle: 'bold',
-                    stroke: '#000000',
-                    strokeThickness: 2
-                });*/
 
                 let userLevelProgress = this.userStats.getNextLevelProgress();
 
