@@ -36,6 +36,10 @@ export class Load extends Phaser.Scene{
             frameWidth: 77,
             frameHeight: 71
         });
+        this.load.spritesheet('button3', 'assets/button3.png', {
+            frameWidth: 77,
+            frameHeight: 71
+        });
 
         this.load.image('grass', 'assets/grass01.png');
         this.load.image('cup', 'assets/cup.png');

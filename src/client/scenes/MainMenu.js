@@ -63,16 +63,15 @@ export class MainMenu extends Phaser.Scene {
         this.add.sprite(260 + size, 482, 'casual');
 
         this.addButton(260 + size * 2, this.seperatorY2 - 33, () => { // Casual button
-            this.searchGame(RoomEnum.COMPETITIVE, this.username);
+            this.searchGame(RoomEnum.COMPETITIVE, this.username, this.rank);
         });
         this.addButton(260 + size, this.seperatorY2 - 33, () => { // Competitive button
-            this.searchGame(RoomEnum.CASUAL, this.username, this.rank);
+            this.searchGame(RoomEnum.CASUAL, this.username);
         });
 
-
-        //this.addButton(this.seperatorX - 120, this.seperatorY2 + 40, () => { // Replays button
-        //    this.scene.start("UserReplays", this.username);
-        //});
+        this.addRefreshButton(650, 490, () => { // Replays button
+            this.scene.start("UserReplays", this.username);
+        });
 
         this.add.text(181 + size * 2, this.seperatorY2 - 45, 'Play Competitive', {
             fontFamily: '"Snap ITC"',
@@ -145,6 +144,21 @@ export class MainMenu extends Phaser.Scene {
             });
     }
 
+    addRefreshButton(x, y, onClick) {
+        this.add.sprite(x, y, "button3", 1)
+            .setScale(0.3)
+            .setInteractive()
+            .on('pointerdown', function () {
+                this.setTexture('button3', 0);
+                onClick();
+            })
+            .on('pointerover', function () {
+                this.setTexture('button3', 2)
+            })
+            .on('pointerout', function () {
+                this.setTexture('button3', 1)
+            });
+    }
 
     update() {
         if (room !== null) {
