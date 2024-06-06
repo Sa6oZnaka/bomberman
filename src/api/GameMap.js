@@ -212,12 +212,7 @@ export class GameMap {
 
     placeBomb(x, y) {
 
-        console.log(this.map[y][x]);
-
         if(this.map[y][x] == 0){
-            console.log(y, x);
-            console.log("BUGVA");
-
             this.map[y][x].fieldType = FieldEnum.EMPTY;
         }
 

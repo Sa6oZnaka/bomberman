@@ -130,8 +130,6 @@ export class Game extends Phaser.Scene {
             let bombY = pos.y;
             bombs.addBomb(bombX, bombY, sprite);
 
-            console.log(bombs.bombs);
-
             setTimeout(() => {
                 bombs.removeBomb(bombX, bombY);
                 //sprite.destroy();

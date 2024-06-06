@@ -19,8 +19,6 @@ export class Load extends Phaser.Scene{
         this.load.image('backButton', 'assets/back_button.png');
         this.load.image('newButton', 'assets/new_message_button.png');
         this.load.image('refreshButton', 'assets/refresh_button.png');
-        this.load.image('leaderboard', 'assets/leaderboard.png');
-        this.load.image('side', 'assets/side.png');
 
         this.load.image('stone', 'assets/stone01.png');
         this.load.image('logo', 'assets/logo.png');

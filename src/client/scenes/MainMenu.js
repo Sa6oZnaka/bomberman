@@ -105,7 +105,7 @@ export class MainMenu extends Phaser.Scene {
                 onClick();
             })
             .on('pointerover', function () {
-                this.setTexture('button1', 2)
+                this.setTexture('button1', 0)
             })
             .on('pointerout', function () {
                 this.setTexture('button1', 1)
@@ -137,7 +137,7 @@ export class MainMenu extends Phaser.Scene {
                 onClick();
             })
             .on('pointerover', function () {
-                this.setTexture('button2', 2)
+                this.setTexture('button2', 0)
             })
             .on('pointerout', function () {
                 this.setTexture('button2', 1)
@@ -153,7 +153,7 @@ export class MainMenu extends Phaser.Scene {
                 onClick();
             })
             .on('pointerover', function () {
-                this.setTexture('button3', 2)
+                this.setTexture('button3', 0)
             })
             .on('pointerout', function () {
                 this.setTexture('button3', 1)
@@ -167,9 +167,6 @@ export class MainMenu extends Phaser.Scene {
     }
 
     searchGame(type, username, rank) {
-
-        console.log("searching for gamne  " + username);
-
         if (username === null) return;
         socket.connect().emit('findGame', {
             type: type,
