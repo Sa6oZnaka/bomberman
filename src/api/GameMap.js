@@ -25,6 +25,19 @@ export class GameMap {
         return map;
     }
 
+    initMap(oldMap) {
+        this.map = [];
+        for (let i = 0; i < oldMap.length; i++) {
+            let row = [];
+            for (let j = 0; j < oldMap[0].length; j++) {
+                row.push({
+                    fieldType: oldMap[i][j]
+                });
+            }
+            this.map.push(row);
+        }
+    }
+
     getMap(){
         let map = [];
         for (let i = 0; i < this.map.length; i++) {

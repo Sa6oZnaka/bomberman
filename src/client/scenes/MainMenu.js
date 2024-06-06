@@ -69,6 +69,11 @@ export class MainMenu extends Phaser.Scene {
             this.searchGame(RoomEnum.CASUAL, this.username, this.rank);
         });
 
+
+        //this.addButton(this.seperatorX - 120, this.seperatorY2 + 40, () => { // Replays button
+        //    this.scene.start("UserReplays", this.username);
+        //});
+
         this.add.text(181 + size * 2, this.seperatorY2 - 45, 'Play Competitive', {
             fontFamily: '"Snap ITC"',
             fontStyle: 'bold',

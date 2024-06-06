@@ -64,9 +64,6 @@ export class Game extends Phaser.Scene {
 
     handleSpawn = (data) => {
 
-        console.log("Spawn called!");
-        console.log(data);
-
         gameMap = new GameMap();
         gameMap.map = data.map;
         this.drawMap();
@@ -90,17 +87,13 @@ export class Game extends Phaser.Scene {
         }
 
         user2 = users.get(socket.id);
-        user = new User("nz", user2.x, user2.y);
+        user = new User("", user2.x, user2.y);
 
         inGame = true;
 
     }
 
     drawMap() {
-        console.log("draw map CALLED");
-        console.log(gameMap.map.length);
-        console.log(gameMap.map[0].length);
-
         for (let i = 0; i < gameMap.map.length; i++) {
             for (let j = 0; j < gameMap.map[0].length; j++) {
                 const field = gameMap.map[i][j];
