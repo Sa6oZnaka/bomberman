@@ -301,7 +301,7 @@ export class MainMenu extends Phaser.Scene {
                     if (data[i].status === 'P') {
                         // this.scale.width = canvas.width
                         this.removeFriendButton(1000 - 20, 362 + sizeY * i, data[i].username);
-                        this.addAcceptButton(1000 - 20*2, 362 + sizeY * i, this.seperatorY1 + 35 + 30 * i, data[i]);
+                        this.addAcceptButton(1000 - 20*2, 362 + sizeY * i, data[i]);
                         //this.blockUser(this.scale.width - 24 - 15, this.seperatorY1 + 35 + 30 * i, data[i].username);
                         backgroundColor = 0xEAAE33;
                     } else if (data[i].status === 'F') {
@@ -362,6 +362,9 @@ export class MainMenu extends Phaser.Scene {
 
 
     addAcceptButton(x, y, data){
+
+        console.log(data);
+
         this.addSmallButton(x, y, 0, function () {
             http.open('POST', '/acceptFriend', true);
             http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');

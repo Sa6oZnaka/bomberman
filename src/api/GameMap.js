@@ -38,11 +38,11 @@ export class GameMap {
         }
     }
 
-    getMap(){
+    getMap() {
         let map = [];
         for (let i = 0; i < this.map.length; i++) {
             map[i] = [];
-            for (let j = 0; j < this.map[0].length; j++) {
+            for (let j = 0; j < this.map[i].length; j++) {
                 map[i][j] = this.map[i][j];
             }
         }
