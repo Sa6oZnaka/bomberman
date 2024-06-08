@@ -3,9 +3,6 @@ import {Action} from "./Action";
 export class GameRecorder {
 
     constructor(map, users){
-        console.log("--");
-        console.log(map);
-
         this.map = this.extractOldMap(map);
         this.users = users;
 
