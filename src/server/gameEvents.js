@@ -130,6 +130,7 @@ module.exports = function (io, serverRooms, connection) {
                 });
                 if (room.hasMatchMaking) {
                     let roomRank = room.getAverageRank();
+
                     require('./saveReplay')(connection, {
                         'replay': room.gameRecorder.export(),
                         'players': room.getUsers(),

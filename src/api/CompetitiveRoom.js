@@ -12,7 +12,7 @@ export class CompetitiveRoom extends Room {
     }
 
     beginRecording() {
-        if (this.gameRecorder === null)
+        if (this.gameRecorder == null)
             this.gameRecorder = new GameRecorder(this.getMap(), this.getUsers())
     }
 

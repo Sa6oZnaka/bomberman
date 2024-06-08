@@ -23,7 +23,7 @@ export class Replay extends Phaser.Scene {
 
         this.graphics = this.add.graphics();
         this.gameMap = new GameMap();
-        this.gameMap.map = replayData.map;
+        this.gameMap.initMap(replayData.map);
 
         this.drawMap();
 
@@ -156,12 +156,7 @@ export class Replay extends Phaser.Scene {
         for (let i = 0; i < this.gameMap.map.length; i++) {
             for (let j = 0; j < this.gameMap.map[0].length; j++) {
                 const field = this.gameMap.map[i][j];
-
-                console.log(field);
-
                 if (field.fieldType === FieldEnum.EMPTY) {
-                    console.log("aa");
-
                     let sp = this.add
                         .sprite(j * 40 + 20, i * 40 + 20, 'grass')
                         .setScale(0.5);
