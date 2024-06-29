@@ -20,6 +20,15 @@ export class Bombs {
         }
     }
 
+    hasBomb(x, y) {
+        for (let i = 0; i < this.bombs.length; i++) {
+            if (this.bombs[i].x === x && this.bombs[i].y === y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     removeBombs(points) {
         for(let i = 0; i < points.length; i ++){
             this.removeBomb(points[i].x, points[i].y);

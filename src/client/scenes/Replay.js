@@ -63,13 +63,9 @@ export class Replay extends Phaser.Scene {
             let action = this.actions[this.lastActionID];
             switch (action.type) {
                 case ActionEnum.MOVE:
-
                     this.users.get(action.data.id).transit(action.data.point.x, action.data.point.y, this.tweens);
                     break;
-
                 case ActionEnum.PLACE_BOMB:
-
-
                     let sprite = this.add.sprite(
                         action.data.point.x * 40 + 20,
                         action.data.point.y * 40 + 20, 'bomb')
@@ -80,13 +76,9 @@ export class Replay extends Phaser.Scene {
                     this.bombs.addBomb(bombX, bombY, sprite);
 
                     setTimeout(() => {
-                        this.bombs.removeBomb(bombX, bombY);
-                        //sprite.destroy();
-
-                        this.handleExplode(action.data.point.x, action.data.point.y);
-
+                        if(this.bombs.hasBomb(bombX, bombY))
+                            this.handleExplode(action.data.point.x, action.data.point.y);
                     }, 990);
-
 
                     this.gameMap.placeBomb(action.data.point.x, action.data.point.y);
                     setTimeout(() => {
@@ -110,6 +102,46 @@ export class Replay extends Phaser.Scene {
             this.scene.start("MainMenu");
         }
     }
+
+    handleExplode = (posX, posY) => {
+        let detonated = this.gameMap.detonate(posX, posY);
+
+        this.bombs.removeBombs(detonated);
+
+        for (let i = 0; i < detonated.length; i++) {
+            let x = detonated[i].x;
+            let y = detonated[i].y;
+
+            let sprite = this.add
+                .sprite(
+                    detonated[i].x * 40 + 20,
+                    detonated[i].y * 40 + 20,
+                    'explode', 0)
+                .setScale(0.33);
+
+            let textureIndex = 0; // индекс на текстурата
+            let totalTextures = 6;
+
+            // Използване на `setInterval` за забавяне на премахването с 1 секунда
+            let interval = setInterval(() => {
+                // if game ends (explosion kills player)
+                if (endGame || !inGame) {
+                    clearInterval(interval);
+                    return;
+                }
+
+                if (textureIndex >= totalTextures || !sprite.texture) {
+                    clearInterval(interval); // спиране на интервала след последната текстура
+                    sprite.destroy();
+                    gameMap.map[y][x].sp.setTexture("grass").setScale(0.5);
+                    return;
+                }
+
+                sprite.setTexture("explode", textureIndex).setScale(0.33);
+                textureIndex++; // увеличаване на индекса за следващата текстура
+            }, 12); // интервалът е на всяка секунда
+        }
+    };
 
     handleExplode = (x, y) => {
         let detonated = this.gameMap.detonate(x, y);
