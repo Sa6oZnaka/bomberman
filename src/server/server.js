@@ -1,5 +1,7 @@
 import {ServerRooms} from "../api/ServerRooms";
 
+let connection;
+
 let express = require('express')
     , session = require('express-session')
     , app = express()
@@ -10,7 +12,7 @@ let express = require('express')
     , io = require('socket.io')(http)
     , passport = require('passport')
     , flash = require('connect-flash')
-    , connection = require('./dbInit')
+  //  , connection = require('./dbInit')
     , serverConfig = require('../../config/serverConfig');
 
 app.set('view engine', 'ejs')

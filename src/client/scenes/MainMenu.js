@@ -13,8 +13,8 @@ export class MainMenu extends Phaser.Scene {
     }
 
     init() {
-        this.username = null;
-        this.rank = null;
+        this.username = "NoDb";
+        this.rank = 5;
         room = null;
     }
 

@@ -7,6 +7,8 @@ module.exports = function (passport, connection) {
     });
 
     passport.deserializeUser(function (id, done) {
+        return null;
+
         connection.query("SELECT * FROM user WHERE id = ? ", [id],
             function (err, rows) {
                 done(err, rows[0]);
@@ -21,6 +23,10 @@ module.exports = function (passport, connection) {
                 passReqToCallback: true
             },
             function (req, username, password, done) {
+
+                return null;
+
+
                 connection.query("SELECT * FROM user WHERE username = ? ",
                     [username], function (err, rows) {
                         if (err)
@@ -57,6 +63,8 @@ module.exports = function (passport, connection) {
                 passReqToCallback: true
             },
             function (req, username, password, done) {
+                return ["user"];
+
                 connection.query("SELECT * FROM user WHERE username = ? ", [username],
                     function (err, rows) {
                         if (err)

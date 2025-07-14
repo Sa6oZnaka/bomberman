@@ -36,7 +36,8 @@ module.exports = function (app, passport, connection, serverRooms) {
         failureFlash: true
     }));
 
-    app.get('/', isLoggedIn, function (req, res) {
+    app.get('/', function (req, res) {
+        console.log("OK!");
         res.render('index.ejs', null);
     });
 
@@ -169,6 +170,8 @@ module.exports = function (app, passport, connection, serverRooms) {
 };
 
 function isLoggedIn(req, res, next) {
+    return true;
+
     if (req.isAuthenticated())
         return next();
 

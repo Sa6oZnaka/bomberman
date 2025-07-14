@@ -124,7 +124,7 @@ module.exports = function (io, serverRooms, connection) {
                     }
                 }
                 io.to(roomID).emit('endGame', "Lose");
-                require('./updateUsersLevel')(connection, {
+                /*require('./updateUsersLevel')(connection, {
                     'players': room.getUsers(),
                     'winner': winner
                 });
@@ -141,7 +141,7 @@ module.exports = function (io, serverRooms, connection) {
                         'winner': winner,
                         'rank': roomRank
                     });
-                }
+                }*/
 
                 serverRooms.removeRoom(roomID);
             }
